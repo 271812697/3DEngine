@@ -1,8 +1,3 @@
-/**
-* @project: Overload
-* @author: Overload Tech.
-* @licence: MIT
-*/
 
 #include "OvUI/Panels/APanelTransformable.h"
 #include "OvUI/Internal/Converter.h"
