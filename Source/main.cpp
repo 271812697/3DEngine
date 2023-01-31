@@ -42,8 +42,14 @@ int main(int, char**)
     auto m_uiManager= std::make_unique<OvUI::Core::UIManager>(window, OvUI::Styling::EStyle::ALTERNATIVE_DARK);
     m_uiManager->EnableEditorLayoutSave(false);
     m_uiManager->EnableDocking(false);
+    m_uiManager->LoadFont("Lato", "E:\\C++\\LearnGL_UI\\Resource\\font\\Lato.ttf", 18);
+    m_uiManager->LoadFont("forkawesome-webfont", "E:\\C++\\LearnGL_UI\\Resource\\font\\forkawesome-webfont.ttf", 18);
+    m_uiManager->LoadFont("palatino", "E:\\C++\\LearnGL_UI\\Resource\\font\\palatino.ttf", 18);
+    m_uiManager->LoadFont("trebuc", "E:\\C++\\LearnGL_UI\\Resource\\font\\trebuc.ttf", 18);
+    m_uiManager->UseFont("trebuc");
     OvUI::Modules::Canvas m_canvas;
     m_uiManager->SetCanvas(m_canvas);
+
     std::unique_ptr<OvUI::Panels::PanelWindow> m_mainPanel=std::make_unique<OvUI::Panels::PanelWindow>("Overload - Project Hub", true );
     m_mainPanel->resizable = false;
     m_mainPanel->movable = false;
