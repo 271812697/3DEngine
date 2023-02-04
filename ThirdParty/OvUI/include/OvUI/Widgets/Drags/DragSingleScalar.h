@@ -21,7 +21,7 @@ namespace OvUI::Widgets::Drags
 		static_assert(std::is_scalar<T>::value, "Invalid DragSingleScalar T (Scalar expected)");
 
 	public:
-		/**
+	   /*
 		* Constructor
 		* @param p_dataType
 		* @param p_min
@@ -30,6 +30,8 @@ namespace OvUI::Widgets::Drags
 		* @param p_speed
 		* @param p_label
 		* @param p_format
+        * 
+        * 
 		*/
 		DragSingleScalar
 		(

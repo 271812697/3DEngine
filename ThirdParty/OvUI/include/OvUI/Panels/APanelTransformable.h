@@ -17,9 +17,7 @@
 
 namespace OvUI::Panels
 {
-	/**
-	* APanelTransformable is a panel that is localized in the canvas
-	*/
+
 	class APanelTransformable : public APanel
 	{
 	public:

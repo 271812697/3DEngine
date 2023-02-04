@@ -17,11 +17,6 @@ namespace  OvUI::Internal { class WidgetContainer; }
 
 namespace OvUI::Widgets
 {
-	/**
-	* A AWidget is the base class for any widget of OvUI.
-	* It is basically a visual element that can be placed into a panel.
-	* It is drawable and can receive plugins
-	*/
 	class AWidget : public API::IDrawable, public Plugins::Pluginable
 	{
 	public:

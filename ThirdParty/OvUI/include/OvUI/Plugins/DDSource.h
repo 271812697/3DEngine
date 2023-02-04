@@ -10,7 +10,7 @@
 
 #include <OvTools/Eventing/Event.h>
 
-#include "OvUI/ImGui/imgui.h"
+#include "imgui.h"
 
 #include "OvUI/Plugins/IPlugin.h"
 

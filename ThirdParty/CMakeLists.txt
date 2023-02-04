@@ -73,6 +73,33 @@ if(NOT TARGET ovtools)
     target_include_directories(ovtools PUBLIC $<BUILD_INTERFACE:${ovtools_SOURCE_DIR_}/include>)
     set_target_properties(ovtools PROPERTIES FOLDER ${third_party_folder}/ovtools)
 endif()
+if(NOT TARGET std_image)
+    set(std_image_SOURCE_DIR_ ${CMAKE_CURRENT_SOURCE_DIR}/stb_Image)
+    file(GLOB_RECURSE std_image_impl CONFIGURE_DEPENDS  
+    "${std_image_SOURCE_DIR_}/*.cpp")
+    file(GLOB_RECURSE std_image_head CONFIGURE_DEPENDS  
+    "${std_image_SOURCE_DIR_}/*.h")
+    source_group(TREE "${std_image_SOURCE_DIR_}" FILES ${std_image_head} ${std_image_impl})
+    add_library(std_image STATIC ${std_image_head} ${std_image_impl})
+    set_target_properties(std_image PROPERTIES LINKER_LANGUAGE CXX)
+    target_include_directories(std_image PUBLIC $<BUILD_INTERFACE:${std_image_SOURCE_DIR_}/include>)
+    set_target_properties(std_image PROPERTIES FOLDER ${third_party_folder}/std_image)
+endif()
+if(NOT TARGET ovwindow)
+    set(ovwindow_SOURCE_DIR_ ${CMAKE_CURRENT_SOURCE_DIR}/OvWindowing)
+    file(GLOB_RECURSE ovwindow_impl CONFIGURE_DEPENDS  
+    "${ovwindow_SOURCE_DIR_}/*.cpp")
+    file(GLOB_RECURSE ovwindow_head CONFIGURE_DEPENDS  
+    "${ovwindow_SOURCE_DIR_}/*.h")
+    source_group(TREE "${ovwindow_SOURCE_DIR_}" FILES ${ovwindow_impl} ${ovwindow_head})
+    add_library(ovwindow STATIC ${ovwindow_impl} ${ovwindow_head})
+    target_link_libraries(ovwindow PUBLIC glfw)
+    target_link_libraries(ovwindow PUBLIC ovtools)
+    target_link_libraries(ovwindow PUBLIC std_image)
+    target_include_directories(ovwindow PUBLIC $<BUILD_INTERFACE:${ovwindow_SOURCE_DIR_}/include>)
+    set_target_properties(ovwindow PROPERTIES FOLDER ${third_party_folder}/ovwindow)
+endif()
+
 
 
 
