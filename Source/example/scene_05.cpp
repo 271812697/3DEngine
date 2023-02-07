@@ -207,8 +207,8 @@ namespace scene {
             ubo.SetUniform(0, val_ptr(main_camera.T->position));
             ubo.SetUniform(1, val_ptr(main_camera.T->forward));
             ubo.SetUniform(2, val_ptr(main_camera.GetViewMatrix()));
-           // ubo.SetUniform(3, val_ptr(glm::perspective(glm::radians(45.0f),1.0f* render_Fbo->width /render_Fbo->height,0.1f, 100.0f)));
-            ubo.SetUniform(3, val_ptr(main_camera.GetProjectionMatrix()));
+            ubo.SetUniform(3, val_ptr(glm::perspective(glm::radians(45.0f),1.0f* render_Fbo->width /render_Fbo->height,0.1f, 100.0f)));
+            
         }
         if (auto& ubo = UBOs[1]; true) {
             auto& pl_1 = point_light.GetComponent<PointLight>();
