@@ -161,6 +161,121 @@ void OvUI::Core::UIManager::ApplyStyle(Styling::EStyle p_style)
         colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
         colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
     }
+    else {
+    ImGuiIO& io = ImGui::GetIO();
+    ImGuiStyle& style = ImGui::GetStyle();
+
+   
+
+    // load fonts from the resource folder
+    float fontsize_main = 18.0f;
+    float fontsize_icon = 18.0f;  // bake icon font into the main font
+    float fontsize_sub = 17.0f;
+
+
+
+    ImFontConfig config_main;
+    config_main.PixelSnapH = true;
+    config_main.OversampleH = 4;
+    config_main.OversampleV = 4;
+    config_main.RasterizerMultiply = 1.2f;  // brighten up the font to make them more readable
+    config_main.GlyphExtraSpacing.x = 0.0f;
+
+    ImFontConfig config_sub;
+    config_sub.PixelSnapH = true;
+    config_sub.OversampleH = 4;
+    config_sub.OversampleV = 4;
+    config_sub.RasterizerMultiply = 1.25f;  // brighten up the font to make them more readable
+    config_sub.GlyphExtraSpacing.x = 0.0f;
+
+    ImFontConfig config_icon;
+    config_icon.MergeMode = true;
+    config_icon.PixelSnapH = true;
+    config_icon.OversampleH = 4;
+    config_icon.OversampleV = 4;
+    config_icon.RasterizerMultiply = 1.5f;  // brighten up the font to make them more readable
+    config_icon.GlyphOffset.y = 0.0f;       // tweak this to vertically align with the main font
+    config_icon.GlyphMinAdvanceX = fontsize_main;  // enforce monospaced icon font
+    config_icon.GlyphMaxAdvanceX = fontsize_main;  // enforce monospaced icon font
+
+
+
+
+    // load default dark theme
+    ImGui::StyleColorsDark();
+
+    // setup custom styles
+    style.WindowBorderSize = 0.0f;
+    style.FrameBorderSize = 1.0f;
+    style.PopupBorderSize = 1.0f;
+    style.ChildBorderSize = 1.0f;
+    style.TabBorderSize = 0.0f;
+    style.ScrollbarSize = 18.0f;
+    style.GrabMinSize = 10.0f;
+
+    style.WindowPadding = ImVec2(8.0f, 8.0f);
+    style.FramePadding = ImVec2(4.0f, 6.0f);
+    style.ItemSpacing = ImVec2(10.0f, 10.0f);
+    style.ItemInnerSpacing = ImVec2(10.0f, 10.0f);
+    style.IndentSpacing = 16.0f;
+
+    style.WindowRounding = 0.0f;
+    style.ChildRounding = 0.0f;
+    style.FrameRounding = 4.0f;
+    style.PopupRounding = 0.0f;
+    style.TabRounding = 4.0f;
+    style.GrabRounding = 4.0f;
+    style.ScrollbarRounding = 12.0f;
+
+    style.WindowMenuButtonPosition = ImGuiDir_Left;
+    style.ColorButtonPosition = ImGuiDir_Right;
+
+    style.ButtonTextAlign = ImVec2(0.5f, 0.5f);
+    style.WindowTitleAlign = ImVec2(0.0f, 0.5f);
+    style.SelectableTextAlign = ImVec2(0.0f, 0.0f);
+
+    style.AntiAliasedLines = true;
+    style.AntiAliasedFill = true;
+    style.AntiAliasedLinesUseTex = true;
+
+    // setup custom colors
+    auto& c = ImGui::GetStyle().Colors;
+
+    c[ImGuiCol_WindowBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.85f);
+    c[ImGuiCol_ChildBg] = ImVec4(0.1f, 0.1f, 0.1f, 0.85f);
+    c[ImGuiCol_PopupBg] = ImVec4(0.1f, 0.1f, 0.1f, 0.85f);
+
+    c[ImGuiCol_FrameBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.75f);
+    c[ImGuiCol_FrameBgHovered] = ImVec4(0.2f, 0.2f, 0.2f, 0.75f);
+    c[ImGuiCol_FrameBgActive] = ImVec4(0.3f, 0.3f, 0.3f, 0.75f);
+
+    c[ImGuiCol_TitleBg] = ImVec4(0.2f, 0.2f, 0.2f, 0.75f);
+    c[ImGuiCol_TitleBgActive] = ImVec4(0.0f, 0.3f, 0.0f, 0.9f);
+    c[ImGuiCol_TitleBgCollapsed] = ImVec4(0.0f, 0.0f, 0.0f, 0.75f);
+
+    c[ImGuiCol_ScrollbarBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.75f);
+    c[ImGuiCol_ScrollbarGrab] = ImVec4(0.2f, 0.2f, 0.2f, 0.9f);
+    c[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.3f, 0.3f, 0.3f, 0.9f);
+    c[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.4f, 0.4f, 0.4f, 0.9f);
+
+    c[ImGuiCol_CheckMark] = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
+    c[ImGuiCol_SliderGrab] = ImVec4(0.0f, 0.4f, 0.0f, 0.9f);
+    c[ImGuiCol_SliderGrabActive] = ImVec4(0.0f, 0.5f, 0.0f, 0.9f);
+
+    c[ImGuiCol_Button] = ImVec4(0.0f, 0.3f, 0.0f, 0.9f);
+    c[ImGuiCol_ButtonHovered] = ImVec4(0.0f, 0.55f, 0.0f, 0.9f);
+    c[ImGuiCol_ButtonActive] = ImVec4(0.0f, 0.5f, 0.0f, 0.9f);
+
+    c[ImGuiCol_Header] = ImVec4(0.5f, 0.0f, 1.0f, 0.5f);
+    c[ImGuiCol_HeaderHovered] = ImVec4(0.5f, 0.0f, 1.0f, 0.8f);
+    c[ImGuiCol_HeaderActive] = ImVec4(0.5f, 0.0f, 1.0f, 0.7f);
+
+    c[ImGuiCol_Tab] = ImVec4(0.0f, 0.3f, 0.0f, 0.8f);
+    c[ImGuiCol_TabHovered] = ImVec4(0.0f, 0.4f, 0.0f, 0.8f);
+    c[ImGuiCol_TabActive] = ImVec4(0.0f, 0.4f, 0.0f, 0.8f);
+    c[ImGuiCol_TabUnfocused] = ImVec4(0.2f, 0.2f, 0.2f, 0.9f);
+    c[ImGuiCol_TabUnfocusedActive] = ImVec4(0.2f, 0.2f, 0.2f, 0.9f);
+    }
 }
 
 bool OvUI::Core::UIManager::LoadFont(const std::string& p_id, const std::string & p_path, float p_fontSize)

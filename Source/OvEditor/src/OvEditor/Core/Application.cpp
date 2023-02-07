@@ -1,15 +1,17 @@
+#include<glad/glad.h>
 #include <OvTools/Time/Clock.h>
 #include "OvEditor/Core/Application.h"
+#include "OvEditor/Panels/AView.h"
 OvEditor::Core::Application::Application(const std::string& p_projectPath, const std::string& p_projectName) 
 {
     /* Settings */
     OvWindowing::Settings::DeviceSettings deviceSettings;
     deviceSettings.contextMajorVersion = 4;
-    deviceSettings.contextMinorVersion = 3;
+    deviceSettings.contextMinorVersion = 6;
     windowSettings.title = "Overload Editor";
     windowSettings.width = 1280;
     windowSettings.height = 720;
-    windowSettings.maximized = true;
+    windowSettings.maximized = false;
     /* Window creation */
     device = std::make_unique<OvWindowing::Context::Device>(deviceSettings);
     window = std::make_unique<OvWindowing::Window>(*device, windowSettings);
@@ -18,18 +20,27 @@ OvEditor::Core::Application::Application(const std::string& p_projectPath, const
     inputManager = std::make_unique<OvWindowing::Inputs::InputManager>(*window);
     window->MakeCurrentContext();
 
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+        throw std::exception("unable to glad");
+    }
+    
     device->SetVsync(true);
 
-    uiManager = std::make_unique<OvUI::Core::UIManager>(window->GetGlfwWindow(), OvUI::Styling::EStyle::ALTERNATIVE_DARK);
-    uiManager->LoadFont("Ruda_Big",  "E:\\C++\\LearnGL_UI\\Resource\\font\\trebuc.ttf", 20);
-    uiManager->LoadFont("Ruda_Small", "E:\\C++\\LearnGL_UI\\Resource\\font\\Lato.ttf", 12);
-    uiManager->LoadFont("Ruda_Medium", "E:\\C++\\LearnGL_UI\\Resource\\font\\Lato.ttf", 14);
+    uiManager = std::make_unique<OvUI::Core::UIManager>(window->GetGlfwWindow(), OvUI::Styling::EStyle::CUSTOM);
+    uiManager->LoadFont("Ruda_Big",  "Resource\\font\\trebuc.ttf", 20);
+    uiManager->LoadFont("Ruda_Small", "Resource\\font\\Lato.ttf", 12);
+    uiManager->LoadFont("Ruda_Medium", "Resource\\font\\Lato.ttf", 14);
     uiManager->UseFont("Ruda_Big");
    // uiManager->SetEditorLayoutSaveFilename(std::string(getenv("APPDATA")) + "\\OverloadTech\\OvEditor\\layout.ini");
     uiManager->SetEditorLayoutAutosaveFrequency(60.0f);
     uiManager->EnableEditorLayoutSave(true);
     uiManager->EnableDocking(true);
     uiManager->SetCanvas(m_editor.m_canvas);
+    m_editor.SetupUI();
+    scene = std::make_unique<scene::Scene05>("scene05");
+    scene->Init();
+    dynamic_cast<scene::Scene05*>(scene.get())->setRenderFBO(m_editor.m_panelsManager.GetPanelAs<OvEditor::Panels::AView>("Scene View").m_fbo);
+    
 }
 
 OvEditor::Core::Application::~Application()
@@ -43,18 +54,16 @@ void OvEditor::Core::Application::Run()
 	while (IsRunning())
 	{
         glfwPollEvents();
-        glClearColor(0.f, 0.f, 0.f,1.0f);
-        glClear
-        (
-             GL_COLOR_BUFFER_BIT  |
-             GL_DEPTH_BUFFER_BIT  |
-             GL_STENCIL_BUFFER_BIT 
-        );
 
+        glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+        glClearDepth(1.0f);
+        glClearStencil(0);  // 8-bit integer
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         m_editor.Update(clock.GetDeltaTime());
+       
+        scene->OnSceneRender(clock.GetDeltaTime());
         uiManager->Render();
-
         window->SwapBuffers();
         inputManager->ClearEvents();
 		clock.Update();

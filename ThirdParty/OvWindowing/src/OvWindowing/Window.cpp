@@ -319,6 +319,7 @@ void OvWindowing::Window::CreateGlfwWindow(const Settings::WindowSettings& p_win
 
 	m_glfwWindow = glfwCreateWindow(static_cast<int>(m_size.first), static_cast<int>(m_size.second), m_title.c_str(), selectedMonitor, nullptr);
 
+
 	if (!m_glfwWindow)
 	{
 		throw std::runtime_error("Failed to create GLFW window");

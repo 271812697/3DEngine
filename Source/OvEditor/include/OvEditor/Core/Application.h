@@ -1,16 +1,11 @@
-/**
-* @project: Overload
-* @author: Overload Tech.
-* @licence: MIT
-*/
 #pragma once
-
+#include"../../example/scene_05.h"
 #include <OvWindowing/Context/Device.h>
 #include <OvWindowing/Inputs/InputManager.h>
 #include <OvWindowing/Window.h>
-
 #include <OvUI/Core/UIManager.h>
 #include "OvEditor/Core/Editor.h"
+
 namespace OvEditor::Core
 {
 	/**
@@ -45,6 +40,8 @@ namespace OvEditor::Core
         std::unique_ptr<OvWindowing::Inputs::InputManager>		inputManager;
         std::unique_ptr<OvUI::Core::UIManager>					uiManager;
         OvWindowing::Settings::WindowSettings windowSettings;
+        std::unique_ptr<scene::Scene> scene;
+
 	private:
 		
 		Editor m_editor;
