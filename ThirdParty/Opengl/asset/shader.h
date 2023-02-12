@@ -30,6 +30,7 @@ namespace asset {
         Shader& operator=(Shader&& other) = default;
 
       public:
+        void LoadFromSource(const std::string& source);
         void Bind() const override;
         void Unbind() const override;
 

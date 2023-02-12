@@ -8,3 +8,4 @@ set(THIRD_PARTY_DIR ${PROJECT_SOURCE_DIR}/ThirdParty)
 
 add_subdirectory(Source)
 add_subdirectory(ThirdParty)
+add_subdirectory(PathTrace)

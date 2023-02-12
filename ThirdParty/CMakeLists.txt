@@ -123,7 +123,8 @@ if(NOT TARGET assimp)
     set_target_properties(assimp PROPERTIES FOLDER ${third_party_folder}/Assimp)
     set_target_properties(UpdateAssimpLibsDebugSymbolsAndDLLs PROPERTIES FOLDER ${third_party_folder}/Assimp)
     set_target_properties(zlibstatic PROPERTIES FOLDER ${third_party_folder}/Assimp)
-    set_target_properties(assimp_cmd PROPERTIES FOLDER ${third_party_folder}/Assimp)
+    #set_target_properties(assimp_cmd PROPERTIES FOLDER ${third_party_folder}/Assimp)
+
 
 endif()
 

@@ -1,3 +1,5 @@
+#define EDITOR
+#ifdef EDITOR
 #include<iostream>
 #include<memory>
 #include <filesystem>
@@ -31,4 +33,7 @@ int main(int argc, char** argv)
 
 	return EXIT_SUCCESS;
 }
+
+
+#endif // EDITOR
 

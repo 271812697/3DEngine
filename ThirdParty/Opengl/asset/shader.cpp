@@ -11,6 +11,8 @@ namespace asset {
 
     static GLuint curr_bound_shader = 0;  // keep track of the current rendering state
 
+   
+
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     Shader::Shader(const std::string& source_path) : IAsset(), source_path(source_path) {
@@ -61,6 +63,55 @@ namespace asset {
     Shader::~Shader() {
         Unbind();
         glDeleteProgram(id);
+    }
+
+    void Shader::LoadFromSource(const std::string& source)
+    {
+        
+        std::string macro[12] = { "compute_shader" ,"vertex_shader","tess_ctrl_shader" ,"tess_eval_shader" ,"geometry_shader","fragment_shader",
+            "#ifdef compute_shader","#ifdef vertex_shader","#ifdef tess_ctrl_shader",   "#ifdef tess_eval_shader","#ifdef geometry_shader","#ifdef fragment_shader"
+        };
+        GLenum type[6] = { GL_COMPUTE_SHADER ,GL_VERTEX_SHADER ,GL_TESS_CONTROL_SHADER,GL_TESS_EVALUATION_SHADER,GL_GEOMETRY_SHADER,GL_FRAGMENT_SHADER };
+        
+        for (int i = 0; i < 6; i++) {
+            if (source.find(macro[6+i])==std::string::npos) {
+                continue;
+            }
+            
+            size_t id=source.find("\n",source.find("#version", 0));
+
+            std::string output = source.substr(id);
+            std::string version = source.substr(0,id)+"\n";
+            std::string define = "";
+
+            define += ("#ifndef " + macro[i] + '\n');
+            define += ("#define " + macro[i] + '\n');
+            define += ("#endif\n\n");
+            output = version+define + output;
+            const char* c_source_code = output.c_str();
+            GLuint shader_id = glCreateShader(type[i]);
+            glShaderSource(shader_id, 1, &c_source_code, nullptr);
+            glCompileShader(shader_id);
+
+            GLint status;
+            glGetShaderiv(shader_id, GL_COMPILE_STATUS, &status);
+            if (status == GL_FALSE) {
+                GLint info_log_length;
+                glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &info_log_length);
+
+                GLchar* info_log = new GLchar[info_log_length + 1];
+                glGetShaderInfoLog(shader_id, info_log_length, NULL, info_log);
+
+                CORE_ERROR("Failed to compile shader: {0}", info_log);
+                delete[] info_log;
+                glDeleteShader(shader_id);  // prevent shader leak
+
+                std::cin.get();  // pause the console before exiting so that we can read error messages
+                exit(EXIT_FAILURE);
+            }
+            shaders.push_back(shader_id);
+        }
+        LinkShaders();
     }
 
     void Shader::Bind() const {
@@ -224,8 +275,8 @@ namespace asset {
             }
         }
 
-        ReadShader(source_path, macro, outbuff);
 
+        ReadShader(source_path, macro, outbuff);
         if (outbuff.find("#ifdef " + macro) == std::string::npos) {
             return;  // this shader type is not defined in the GLSL file, skip
         }
