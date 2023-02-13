@@ -2,7 +2,7 @@
 
 ### Radiant  Intensity
 
-![image-20230213110200525](E:\C++\LearnGL_UI\Note\note.assets\image-20230213110200525.png)
+![image-20230213110200525](E:\C++\LearnGL_UI\Note\note.assets\image-20230213110200525.jpg)
 
 ### Angles and Solid Angles
 
