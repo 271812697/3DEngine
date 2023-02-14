@@ -6,10 +6,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # ---- Add source files ----
 file(GLOB_RECURSE HEADER_FILES "*.h" "*.hpp")
 file(GLOB_RECURSE SOURCE_FILES "*.cpp")
+file(GLOB_RECURSE SHADER_FILES "*.glsl")
 
-source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${HEADER_FILES} ${SOURCE_FILES})
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES})
 # ---- Create library ----
-add_executable(${TARGET_NAME} ${HEADER_FILES} ${SOURCE_FILES})
+add_executable(${TARGET_NAME} ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES})
 
 
 set(OIDN_LIBRARIES "OpenImageDenoise")

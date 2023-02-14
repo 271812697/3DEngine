@@ -219,7 +219,7 @@ float SphereIntersect(float rad, vec3 pos, Ray r)
 
     return INF;
 }
-
+//pos 表示矩形的起点 plane 表示矩形所在的平面,u、v表示矩形两条轴的方向、长度为其倒数的两条轴
 float RectIntersect(in vec3 pos, in vec3 u, in vec3 v, in vec4 plane, in Ray r)
 {
     vec3 n = vec3(plane);
@@ -378,7 +378,7 @@ float DielectricFresnel(float cosThetaI, float eta)
 
     return 0.5f * (rs * rs + rp * rp);
 }
-
+//z朝向半球,采样点在半球表面
 vec3 CosineSampleHemisphere(float r1, float r2)
 {
     vec3 dir;
@@ -389,14 +389,14 @@ vec3 CosineSampleHemisphere(float r1, float r2)
     dir.z = sqrt(max(0.0, 1.0 - dir.x * dir.x - dir.y * dir.y));
     return dir;
 }
-
+//z朝向半球,采样点在半球表面
 vec3 UniformSampleHemisphere(float r1, float r2)
 {
     float r = sqrt(max(0.0, 1.0 - r1 * r1));
     float phi = TWO_PI * r2;
     return vec3(r * cos(phi), r * sin(phi), r1);
 }
-
+//采样点在球表面
 vec3 UniformSampleSphere(float r1, float r2)
 {
     float z = 1.0 - 2.0 * r1;
@@ -410,7 +410,7 @@ float PowerHeuristic(float a, float b)
     float t = a * a;
     return t / (b * b + t);
 }
-
+//由N 得到一个TBN
 void Onb(in vec3 N, inout vec3 T, inout vec3 B)
 {
     vec3 up = abs(N.z) < 0.9999999 ? vec3(0, 0, 1) : vec3(1, 0, 0);
@@ -513,7 +513,7 @@ float PhaseHG(float cosTheta, float g)
 
 #ifdef OPT_ENVMAP
 #ifndef OPT_UNIFORM_LIGHT
-
+//由二分查找得到value，转成uv
 vec2 BinarySearch(float value)
 {
     ivec2 envMapResInt = ivec2(envMapRes);
@@ -862,7 +862,7 @@ if(state.depth > 0)
 
         if (leaf > 0) // Leaf node of BLAS
         {
-        //mesh数据
+        
         //与三角形求交
             for (int i = 0; i < rightIndex; i++) // Loop through tris
             {
@@ -900,7 +900,7 @@ if(state.depth > 0)
         }
         else if (leaf < 0) // Leaf node of TLAS
         {
-        //mesh节点
+        
             vec4 r1 = texelFetch(transformsTex, ivec2((-leaf - 1) * 4 + 0, 0), 0).xyzw;
             vec4 r2 = texelFetch(transformsTex, ivec2((-leaf - 1) * 4 + 1, 0), 0).xyzw;
             vec4 r3 = texelFetch(transformsTex, ivec2((-leaf - 1) * 4 + 2, 0), 0).xyzw;
@@ -920,7 +920,7 @@ if(state.depth > 0)
         }
         else
         {
-        //非mesh节点
+       
             leftHit  = AABBIntersect(texelFetch(BVH, leftIndex  * 3 + 0).xyz, texelFetch(BVH, leftIndex  * 3 + 1).xyz, rTrans);
             rightHit = AABBIntersect(texelFetch(BVH, rightIndex * 3 + 0).xyz, texelFetch(BVH, rightIndex * 3 + 1).xyz, rTrans);
 
