@@ -2545,6 +2545,7 @@ static void ShowDemoWindowWidgets()
     }
 }
 
+
 static void ShowDemoWindowLayout()
 {
     IMGUI_DEMO_MARKER("Layout");

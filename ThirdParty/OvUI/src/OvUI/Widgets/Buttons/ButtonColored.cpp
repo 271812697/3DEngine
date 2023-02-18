@@ -1,8 +1,4 @@
-/**
-* @project: Overload
-* @author: Overload Tech.
-* @licence: MIT
-*/
+
 
 #include "OvUI/Widgets/Buttons/ButtonColored.h"
 #include "OvUI/Internal/Converter.h"

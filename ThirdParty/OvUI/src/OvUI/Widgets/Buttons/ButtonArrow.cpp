@@ -1,8 +1,3 @@
-/**
-* @project: Overload
-* @author: Overload Tech.
-* @licence: MIT
-*/
 
 #include "OvUI/Widgets/Buttons/ButtonArrow.h"
 

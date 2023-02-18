@@ -1,9 +1,3 @@
-/**
-* @project: Overload
-* @author: Overload Tech.
-* @licence: MIT
-*/
-
 #include "OvUI/Modules/Canvas.h"
 
 void OvUI::Modules::Canvas::Draw()

@@ -57,6 +57,7 @@ void OvUI::Internal::WidgetContainer::UnconsiderWidget(Widgets::AWidget & p_widg
 
 void OvUI::Internal::WidgetContainer::CollectGarbages()
 {
+    //
 	m_widgets.erase(std::remove_if(m_widgets.begin(), m_widgets.end(), [](std::pair<OvUI::Widgets::AWidget*, Internal::EMemoryMode>& p_item)
 	{
 		bool toDestroy = p_item.first && p_item.first->IsDestroyed();

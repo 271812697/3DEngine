@@ -62,6 +62,18 @@ if(NOT TARGET ovmath)
     set_target_properties(ovmath PROPERTIES FOLDER ${third_party_folder}/ovmath)
 endif()
 
+if(NOT TARGET ovanalytics)
+    set(ovanalytics_SOURCE_DIR_ ${CMAKE_CURRENT_SOURCE_DIR}/OvAnalytics)
+    file(GLOB_RECURSE ovanalytics_impl CONFIGURE_DEPENDS  
+    "${ovanalytics_SOURCE_DIR_}/*.cpp")
+    file(GLOB_RECURSE ovanalytics_head CONFIGURE_DEPENDS  
+    "${ovanalytics_SOURCE_DIR_}/*.h")
+    source_group(TREE "${ovanalytics_SOURCE_DIR_}" FILES ${ovanalytics_impl} ${ovanalytics_head})
+    add_library(ovanalytics STATIC ${ovanalytics_impl} ${ovanalytics_head})
+    target_include_directories(ovanalytics PUBLIC $<BUILD_INTERFACE:${ovanalytics_SOURCE_DIR_}/include>)
+    set_target_properties(ovanalytics PROPERTIES FOLDER ${third_party_folder}/ovanalytics)
+endif()
+
 if(NOT TARGET ovtools)
     set(ovtools_SOURCE_DIR_ ${CMAKE_CURRENT_SOURCE_DIR}/OvTools)
     file(GLOB_RECURSE ovtools_impl CONFIGURE_DEPENDS  
@@ -72,6 +84,77 @@ if(NOT TARGET ovtools)
     add_library(ovtools STATIC ${ovtools_impl} ${ovtools_head})
     target_include_directories(ovtools PUBLIC $<BUILD_INTERFACE:${ovtools_SOURCE_DIR_}/include>)
     set_target_properties(ovtools PROPERTIES FOLDER ${third_party_folder}/ovtools)
+endif()
+
+if(NOT TARGET ovdebug)
+    set(ovdebug_SOURCE_DIR_ ${CMAKE_CURRENT_SOURCE_DIR}/OvDebug)
+    file(GLOB_RECURSE ovdebug_impl CONFIGURE_DEPENDS  
+    "${ovdebug_SOURCE_DIR_}/*.cpp")
+    file(GLOB_RECURSE ovdebug_head CONFIGURE_DEPENDS  
+    "${ovdebug_SOURCE_DIR_}/*.h" "${ovdebug_SOURCE_DIR_}/*.inl")
+    source_group(TREE "${ovdebug_SOURCE_DIR_}" FILES ${ovdebug_impl} ${ovdebug_head})
+    add_library(ovdebug STATIC ${ovdebug_impl} ${ovdebug_head})
+    target_link_libraries(ovdebug PUBLIC ovtools)
+    target_include_directories(ovdebug PUBLIC $<BUILD_INTERFACE:${ovdebug_SOURCE_DIR_}/include>)
+    set_target_properties(ovdebug PROPERTIES FOLDER ${third_party_folder}/ovdebug)
+endif()
+
+if(NOT TARGET ovrendering)
+    set(ovrendering_SOURCE_DIR_ ${CMAKE_CURRENT_SOURCE_DIR}/OvRendering)
+    file(GLOB_RECURSE ovrendering_impl CONFIGURE_DEPENDS  
+    "${ovrendering_SOURCE_DIR_}/*.cpp")
+    file(GLOB_RECURSE ovrendering_head CONFIGURE_DEPENDS  
+    "${ovrendering_SOURCE_DIR_}/*.h" "${ovrendering_SOURCE_DIR_}/*.inl")
+    source_group(TREE "${ovrendering_SOURCE_DIR_}" FILES ${ovrendering_impl} ${ovrendering_head})
+    add_library(ovrendering STATIC ${ovrendering_impl} ${ovrendering_head})
+    target_link_libraries(ovrendering PUBLIC ovtools)
+    target_link_libraries(ovrendering PUBLIC assimp)
+    target_link_libraries(ovrendering PUBLIC glad)
+    target_link_libraries(ovrendering PUBLIC std_image)
+    target_link_libraries(ovrendering PUBLIC ovdebug)
+    target_link_libraries(ovrendering PUBLIC ovmath)
+    target_link_libraries(ovrendering PUBLIC glfw)
+    target_include_directories(ovrendering PUBLIC $<BUILD_INTERFACE:${ovrendering_SOURCE_DIR_}/include>)
+    set_target_properties(ovrendering PROPERTIES FOLDER ${third_party_folder}/ovrendering)
+endif()
+
+if(NOT TARGET ovaudio)
+    set(ovaudio_SOURCE_DIR_ ${CMAKE_CURRENT_SOURCE_DIR}/OvAudio)
+    file(GLOB_RECURSE ovaudio_impl CONFIGURE_DEPENDS  
+    "${ovaudio_SOURCE_DIR_}/*.cpp")
+    file(GLOB_RECURSE ovaudio_head CONFIGURE_DEPENDS  
+    "${ovaudio_SOURCE_DIR_}/*.h" "${ovaudio_SOURCE_DIR_}/*.inl")
+    source_group(TREE "${ovaudio_SOURCE_DIR_}" FILES ${ovaudio_impl} ${ovaudio_head})
+    
+    add_library(ovaudio STATIC ${ovaudio_impl} ${ovaudio_head})
+    target_link_directories(ovaudio PUBLIC	${CMAKE_CURRENT_SOURCE_DIR}/irrklang/lib)
+    target_link_libraries(ovaudio PUBLIC ovtools)
+    target_link_libraries(ovaudio PUBLIC ovdebug)
+    target_link_libraries(ovaudio PUBLIC ovmath)
+    target_link_libraries(ovaudio PUBLIC irrKlang.lib)
+    target_include_directories(ovaudio PUBLIC $<BUILD_INTERFACE:${ovaudio_SOURCE_DIR_}/include>)
+    target_include_directories(ovaudio PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/irrklang/include>)
+    set_target_properties(ovaudio PROPERTIES FOLDER ${third_party_folder}/ovaudio)
+endif()
+if(NOT TARGET ovphysics)
+    set(ovphysics_SOURCE_DIR_ ${CMAKE_CURRENT_SOURCE_DIR}/OvPhysics)
+    file(GLOB_RECURSE ovphysics_impl CONFIGURE_DEPENDS  
+    "${ovphysics_SOURCE_DIR_}/*.cpp")
+    file(GLOB_RECURSE ovphysics_head CONFIGURE_DEPENDS  
+    "${ovphysics_SOURCE_DIR_}/*.h" "${ovphysics_SOURCE_DIR_}/*.inl")
+    file(GLOB_RECURSE ovphysics_lib CONFIGURE_DEPENDS  
+    "${CMAKE_CURRENT_SOURCE_DIR}/bullet3/Debug/lib/*.lib")
+    source_group(TREE "${ovphysics_SOURCE_DIR_}" FILES ${ovphysics_impl} ${ovphysics_head})
+    
+    add_library(ovphysics STATIC ${ovphysics_impl} ${ovphysics_head})
+    #target_link_directories(ovphysics PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/bullet3/Debug/lib)
+    target_link_libraries(ovphysics PUBLIC ovtools)
+    target_link_libraries(ovphysics PUBLIC ovdebug)
+    target_link_libraries(ovphysics PUBLIC ovmath)
+    target_link_libraries(ovphysics PUBLIC ${ovphysics_lib})
+    target_include_directories(ovphysics PUBLIC $<BUILD_INTERFACE:${ovphysics_SOURCE_DIR_}/include>)
+    target_include_directories(ovphysics PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/bullet3/include>)
+    set_target_properties(ovphysics PROPERTIES FOLDER ${third_party_folder}/ovphysics)
 endif()
 if(NOT TARGET std_image)
     set(std_image_SOURCE_DIR_ ${CMAKE_CURRENT_SOURCE_DIR}/stb_Image)
@@ -99,6 +182,76 @@ if(NOT TARGET ovwindow)
     target_link_libraries(ovwindow PUBLIC std_image)
     target_include_directories(ovwindow PUBLIC $<BUILD_INTERFACE:${ovwindow_SOURCE_DIR_}/include>)
     set_target_properties(ovwindow PROPERTIES FOLDER ${third_party_folder}/ovwindow)
+endif()
+
+if(NOT TARGET ovcore)
+    set(ovcore_SOURCE_DIR_ ${CMAKE_CURRENT_SOURCE_DIR}/OvCore)
+    file(GLOB_RECURSE ovcore_impl CONFIGURE_DEPENDS  
+    "${ovcore_SOURCE_DIR_}/*.cpp" "${ovcore_SOURCE_DIR_}/*.inl")
+    file(GLOB_RECURSE ovcore_head CONFIGURE_DEPENDS  
+    "${ovcore_SOURCE_DIR_}/*.h")
+    source_group(TREE "${ovcore_SOURCE_DIR_}" FILES ${ovcore_impl} ${ovcore_head})
+    add_library(ovcore STATIC ${ovcore_impl} ${ovcore_head})
+    target_link_libraries(ovcore PUBLIC glfw)
+    target_link_libraries(ovcore PUBLIC lua)
+    target_link_libraries(ovcore PUBLIC ovtools)
+    target_link_libraries(ovcore PUBLIC std_image)
+    target_link_libraries(ovcore PUBLIC ovphysics)
+    target_link_libraries(ovcore PUBLIC glad)
+    target_link_libraries(ovcore PUBLIC ovanalytics)
+    target_link_libraries(ovcore PUBLIC ovaudio)
+    target_link_libraries(ovcore PUBLIC ovdebug)
+    target_link_libraries(ovcore PUBLIC ovmath)
+    target_link_libraries(ovcore PUBLIC ovrendering)
+    target_link_libraries(ovcore PUBLIC ovtools)
+    target_link_libraries(ovcore PUBLIC ovui)
+    target_link_libraries(ovcore PUBLIC ovwindow)
+    target_include_directories(ovcore PUBLIC $<BUILD_INTERFACE:${ovcore_SOURCE_DIR_}/include>)
+    set_target_properties(ovcore PROPERTIES FOLDER ${third_party_folder}/ovcore)
+    target_compile_options(ovcore PRIVATE /bigobj )
+endif()
+
+if(NOT TARGET lua)
+set(lua_SOURCE_DIR_ ${CMAKE_CURRENT_SOURCE_DIR}/lua)
+add_library(lua STATIC 
+${lua_SOURCE_DIR_}/lapi.c
+${lua_SOURCE_DIR_}/lauxlib.c
+${lua_SOURCE_DIR_}/lbaselib.c
+${lua_SOURCE_DIR_}/lcode.c
+${lua_SOURCE_DIR_}/lcorolib.c
+${lua_SOURCE_DIR_}/lctype.c
+${lua_SOURCE_DIR_}/ldblib.c
+${lua_SOURCE_DIR_}/ldebug.c
+${lua_SOURCE_DIR_}/ldo.c
+${lua_SOURCE_DIR_}/ldump.c
+${lua_SOURCE_DIR_}/lfunc.c
+${lua_SOURCE_DIR_}/lgc.c
+${lua_SOURCE_DIR_}/linit.c
+${lua_SOURCE_DIR_}/liolib.c
+${lua_SOURCE_DIR_}/llex.c
+${lua_SOURCE_DIR_}/lmathlib.c
+${lua_SOURCE_DIR_}/lmem.c
+${lua_SOURCE_DIR_}/loadlib.c
+${lua_SOURCE_DIR_}/lobject.c
+${lua_SOURCE_DIR_}/lopcodes.c
+${lua_SOURCE_DIR_}/loslib.c
+${lua_SOURCE_DIR_}/lparser.c
+${lua_SOURCE_DIR_}/lstate.c
+${lua_SOURCE_DIR_}/lstring.c
+${lua_SOURCE_DIR_}/lstrlib.c
+${lua_SOURCE_DIR_}/ltable.c
+${lua_SOURCE_DIR_}/ltablib.c
+#${lua_SOURCE_DIR_}/ltests.c
+${lua_SOURCE_DIR_}/ltm.c
+#${lua_SOURCE_DIR_}/lua.c
+${lua_SOURCE_DIR_}/lundump.c
+${lua_SOURCE_DIR_}/lutf8lib.c
+${lua_SOURCE_DIR_}/lvm.c
+${lua_SOURCE_DIR_}/lzio.c
+#${lua_SOURCE_DIR_}/onelua.c
+)
+target_include_directories(lua PUBLIC ${lua_SOURCE_DIR_})
+set_target_properties(lua PROPERTIES FOLDER ${third_party_folder}/lua)
 endif()
 
 if(NOT TARGET spdlog)
