@@ -22,12 +22,15 @@ set_target_properties(${TARGET_NAME} PROPERTIES FOLDER "Editor")
 #target_link_libraries(${TARGET_NAME} PUBLIC imgui)
 target_link_libraries(${TARGET_NAME} PUBLIC opengl32.lib)
 #target_link_libraries(${TARGET_NAME} PUBLIC glad)
-target_link_libraries(${TARGET_NAME} PUBLIC ovui)
-target_link_libraries(${TARGET_NAME} PUBLIC ovwindow)
+target_link_libraries(${TARGET_NAME} PUBLIC ovcore)
+#target_link_libraries(${TARGET_NAME} PUBLIC ovwindow)
 target_link_libraries(${TARGET_NAME} PUBLIC opengl)
 
-
-
+file(GLOB IRRKDLL ${THIRD_PARTY_DIR}/irrklang/bin/*.dll)
+#file(COPY ${THIRD_PARTY_DIR}/irrklang/bin/*.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+foreach(list ${IRRKDLL})
+file(COPY ${list} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+endforeach(list ${IRRKDLL})
 
 
 

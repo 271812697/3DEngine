@@ -1,39 +1,100 @@
-#define EDITOR
-#ifdef EDITOR
-#include<iostream>
-#include<memory>
+/**
+* @project: Overload
+* @author: Overload Tech.
+* @licence: MIT
+*/
+
 #include <filesystem>
+
 #include <OvTools/Utils/String.h>
+
+#include <OvRendering/Utils/Defines.h>
+
+#include "OvEditor/Core/ProjectHub.h"
 #include "OvEditor/Core/Application.h"
-#include<Opengl/core/log.h>
+
 #undef APIENTRY
 #include "Windows.h"
 
+FORCE_DEDICATED_GPU
+
+
+void UpdateWorkingDirectory(const std::string& p_executablePath)
+{
+	if (!IsDebuggerPresent())
+	{
+		std::filesystem::current_path(OvTools::Utils::PathParser::GetContainingFolder(p_executablePath));
+	}
+}
+
+int main(int argc, char** argv);
+static void TryRun(const std::string& projectPath, const std::string& projectName);
+
+#ifndef _DEBUG
+INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nCmdShow)
+{
+	main(__argc, __argv);
+}
+#endif
 
 int main(int argc, char** argv)
 {
+	UpdateWorkingDirectory(argv[0]);
 
-    std::string projectPath, projectName;
-    std::unique_ptr<OvEditor::Core::Application> app;
-    ::core::Log::Init();
+	bool ready = false;
+	std::string projectPath;
+	std::string projectName;
 
-    try
-    {
+	{
+		OvEditor::Core::ProjectHub hub;
 
-        app = std::make_unique<OvEditor::Core::Application>(projectPath, projectName);
+		if (argc < 2)
+		{
+			// No project file given as argument ==> Open the ProjectHub
+			std::tie(ready, projectPath, projectName) = hub.Run();
+		}
+		else
+		{
+			// Project file given as argument ==> Open the project
+			std::string projectFile = argv[1];
 
+			if (OvTools::Utils::PathParser::GetExtension(projectFile) == "ovproject")
+			{
+				ready = true;
+				projectPath = OvTools::Utils::PathParser::GetContainingFolder(projectFile);
+				projectName = OvTools::Utils::PathParser::GetElementName(projectFile);
+				OvTools::Utils::String::Replace(projectName, ".ovproject", "");
+			}
 
-        
-    }
-    catch (...) {}
+			hub.RegisterProject(projectPath);
+		}
+	}
 
-    if (app)
-        app->Run();
-    ::core::Log::Shutdown();
+	if (ready)
+		TryRun(projectPath, projectName);
 
 	return EXIT_SUCCESS;
 }
 
+static void TryRun(const std::string& projectPath, const std::string& projectName)
+{
+	auto errorEvent =
+		[](OvWindowing::Context::EDeviceError, std::string errMsg)
+		{
+			errMsg = "requires OpenGL 4.3 or newer.\r\n" + errMsg;
+			MessageBox(0, errMsg.c_str(), "please", MB_OK | MB_ICONSTOP);
+		};
 
-#endif // EDITOR
+	std::unique_ptr<OvEditor::Core::Application> app;
 
+	try
+	{
+		auto listenerId = OvWindowing::Context::Device::ErrorEvent += errorEvent;
+		app = std::make_unique<OvEditor::Core::Application>(projectPath, projectName);
+		OvWindowing::Context::Device::ErrorEvent -= listenerId;
+	}
+	catch (...) {}
+
+	if (app)
+		app->Run();
+}

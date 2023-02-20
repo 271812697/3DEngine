@@ -143,7 +143,7 @@ if(NOT TARGET ovphysics)
     file(GLOB_RECURSE ovphysics_head CONFIGURE_DEPENDS  
     "${ovphysics_SOURCE_DIR_}/*.h" "${ovphysics_SOURCE_DIR_}/*.inl")
     file(GLOB_RECURSE ovphysics_lib CONFIGURE_DEPENDS  
-    "${CMAKE_CURRENT_SOURCE_DIR}/bullet3/Debug/lib/*.lib")
+    "${CMAKE_CURRENT_SOURCE_DIR}/bullet3/lib/Debug/*.lib")
     source_group(TREE "${ovphysics_SOURCE_DIR_}" FILES ${ovphysics_impl} ${ovphysics_head})
     
     add_library(ovphysics STATIC ${ovphysics_impl} ${ovphysics_head})
@@ -209,6 +209,7 @@ if(NOT TARGET ovcore)
     target_include_directories(ovcore PUBLIC $<BUILD_INTERFACE:${ovcore_SOURCE_DIR_}/include>)
     set_target_properties(ovcore PROPERTIES FOLDER ${third_party_folder}/ovcore)
     target_compile_options(ovcore PRIVATE /bigobj )
+    #target_compile_options(ovcore PRIVATE /bigobj )
 endif()
 
 if(NOT TARGET lua)

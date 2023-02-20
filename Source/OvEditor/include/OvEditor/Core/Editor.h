@@ -1,11 +1,22 @@
+/**
+* @project: Overload
+* @author: Overload Tech.
+* @licence: MIT
+*/
+
 #pragma once
 
+#include <OvRendering/LowRenderer/Camera.h>
+
+#include "OvEditor/Core/EditorRenderer.h"
+#include "OvEditor/Core/EditorActions.h"
 #include "OvEditor/Core/PanelsManager.h"
 
 #include <OvUI/Modules/Canvas.h>
 
+#include "OvEditor/Core/Context.h"
 
-
+#include <OvAnalytics/Profiling/ProfilerSpy.h>
 
 namespace OvEditor::Core
 {
@@ -19,8 +30,7 @@ namespace OvEditor::Core
 		* Constructor of the editor
 		* @param p_context
 		*/
-        Editor();
-		
+		Editor(Context& p_context);
 
 		/**
 		* Destructor of the editor
@@ -98,12 +108,12 @@ namespace OvEditor::Core
 		*/
 		void PostUpdate();
 
-	public:
+	private:
 		uint64_t m_elapsedFrames = 0;
 		OvUI::Modules::Canvas			m_canvas;
-        
-
+		OvEditor::Core::Context&		m_context;
+		OvEditor::Core::EditorRenderer	m_editorRenderer;
 		OvEditor::Core::PanelsManager	m_panelsManager;
-
+		OvEditor::Core::EditorActions	m_editorActions;
 	};
 }

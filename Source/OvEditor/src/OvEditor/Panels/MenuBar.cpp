@@ -6,23 +6,35 @@
 
 #include <OvTools/Utils/SystemCalls.h>
 
+#include <OvCore/ECS/Components/CCamera.h>
+#include <OvCore/ECS/Components/CPointLight.h>
+#include <OvCore/ECS/Components/CDirectionalLight.h>
+#include <OvCore/ECS/Components/CSpotLight.h>
+#include <OvCore/ECS/Components/CAmbientBoxLight.h>
+#include <OvCore/ECS/Components/CAmbientSphereLight.h>
+#include <OvCore/ECS/Components/CPhysicalBox.h>
+#include <OvCore/ECS/Components/CPhysicalSphere.h>
+#include <OvCore/ECS/Components/CPhysicalCapsule.h>
+#include <OvCore/ECS/Components/CAudioSource.h>
+#include <OvCore/ECS/Components/CAudioListener.h>
 
 #include <OvUI/Widgets/Visual/Separator.h>
 #include <OvUI/Widgets/Sliders/SliderInt.h>
 #include <OvUI/Widgets/Sliders/SliderFloat.h>
 #include <OvUI/Widgets/Drags/DragFloat.h>
 #include <OvUI/Widgets/Selection/ColorEdit.h>
-#include<OvUI/Widgets/Texts/Text.h>
 
 #include "OvEditor/Panels/MenuBar.h"
-
+#include "OvEditor/Panels/SceneView.h"
+#include "OvEditor/Panels/AssetView.h"
+#include "OvEditor/Core/EditorActions.h"
 #include "OvEditor/Settings/EditorSettings.h"
-
+#include "OvEditor/Utils/ActorCreationMenu.h"
 
 using namespace OvUI::Panels;
 using namespace OvUI::Widgets;
 using namespace OvUI::Widgets::Menu;
-
+using namespace OvCore::ECS::Components;
 
 OvEditor::Panels::MenuBar::MenuBar()
 {
@@ -38,25 +50,39 @@ OvEditor::Panels::MenuBar::MenuBar()
 
 void OvEditor::Panels::MenuBar::HandleShortcuts(float p_deltaTime)
 {
+	auto& inputManager = *EDITOR_CONTEXT(inputManager);
 
+	if (inputManager.GetKeyState(OvWindowing::Inputs::EKey::KEY_LEFT_CONTROL) == OvWindowing::Inputs::EKeyState::KEY_DOWN)
+	{
+		if (inputManager.IsKeyPressed(OvWindowing::Inputs::EKey::KEY_N))
+			EDITOR_EXEC(LoadEmptyScene());
+
+		if (inputManager.IsKeyPressed(OvWindowing::Inputs::EKey::KEY_S))
+		{
+			if (inputManager.GetKeyState(OvWindowing::Inputs::EKey::KEY_LEFT_SHIFT) == OvWindowing::Inputs::EKeyState::KEY_UP)
+				EDITOR_EXEC(SaveSceneChanges());
+			else
+				EDITOR_EXEC(SaveAs());
+		}
+	}
 }
 
 void OvEditor::Panels::MenuBar::CreateFileMenu()
 {
 	auto& fileMenu = CreateWidget<MenuList>("File");
-	fileMenu.CreateWidget<MenuItem>("New Scene", "CTRL + N");
-	fileMenu.CreateWidget<MenuItem>("Save Scene", "CTRL + S");
-	fileMenu.CreateWidget<MenuItem>("Save Scene As...", "CTRL + SHIFT + S");
-	fileMenu.CreateWidget<MenuItem>("Exit", "ALT + F4");
+	fileMenu.CreateWidget<MenuItem>("New Scene", "CTRL + N").ClickedEvent					+= EDITOR_BIND(LoadEmptyScene);
+	fileMenu.CreateWidget<MenuItem>("Save Scene", "CTRL + S").ClickedEvent					+= EDITOR_BIND(SaveSceneChanges);
+	fileMenu.CreateWidget<MenuItem>("Save Scene As...", "CTRL + SHIFT + S").ClickedEvent	+= EDITOR_BIND(SaveAs);
+	fileMenu.CreateWidget<MenuItem>("Exit", "ALT + F4").ClickedEvent						+= [] { EDITOR_CONTEXT(window)->SetShouldClose(true); };
 }
 
 void OvEditor::Panels::MenuBar::CreateBuildMenu()
 {
 	auto& buildMenu = CreateWidget<MenuList>("Build");
-	buildMenu.CreateWidget<MenuItem>("Build game").ClickedEvent				;
-	buildMenu.CreateWidget<MenuItem>("Build game and run").ClickedEvent		;
+	buildMenu.CreateWidget<MenuItem>("Build game").ClickedEvent					+=	EDITOR_BIND(Build, false, false);
+	buildMenu.CreateWidget<MenuItem>("Build game and run").ClickedEvent			+=	EDITOR_BIND(Build, true, false);
 	buildMenu.CreateWidget<Visual::Separator>();
-	buildMenu.CreateWidget<MenuItem>("Temporary build").ClickedEvent		;
+	buildMenu.CreateWidget<MenuItem>("Temporary build").ClickedEvent			+=	EDITOR_BIND(Build, true, true);
 }
 
 void OvEditor::Panels::MenuBar::CreateWindowMenu()
@@ -73,48 +99,76 @@ void OvEditor::Panels::MenuBar::CreateWindowMenu()
 void OvEditor::Panels::MenuBar::CreateActorsMenu()
 {
 	auto& actorsMenu = CreateWidget<MenuList>("Actors");
-    //Utils::ActorCreationMenu::GenerateActorCreationMenu(actorsMenu);
+    Utils::ActorCreationMenu::GenerateActorCreationMenu(actorsMenu);
 }
 
 void OvEditor::Panels::MenuBar::CreateResourcesMenu()
 {
 	auto& resourcesMenu = CreateWidget<MenuList>("Resources");
-	resourcesMenu.CreateWidget<MenuItem>("Compile shaders");
-	resourcesMenu.CreateWidget<MenuItem>("Save materials");
+	resourcesMenu.CreateWidget<MenuItem>("Compile shaders").ClickedEvent += EDITOR_BIND(CompileShaders);
+	resourcesMenu.CreateWidget<MenuItem>("Save materials").ClickedEvent += EDITOR_BIND(SaveMaterials);
 }
 
 void OvEditor::Panels::MenuBar::CreateSettingsMenu()
 {
 	auto& settingsMenu = CreateWidget<MenuList>("Settings");
-	settingsMenu.CreateWidget<MenuItem>("Spawn actors at origin", "", true, true);
-	settingsMenu.CreateWidget<MenuItem>("Vertical Synchronization", "", true, true);
+	settingsMenu.CreateWidget<MenuItem>("Spawn actors at origin", "", true, true).ValueChangedEvent		+= EDITOR_BIND(SetActorSpawnAtOrigin, std::placeholders::_1);
+	settingsMenu.CreateWidget<MenuItem>("Vertical Synchronization", "", true, true).ValueChangedEvent	+= [this](bool p_value) { EDITOR_CONTEXT(device)->SetVsync(p_value); };
 	auto& cameraSpeedMenu = settingsMenu.CreateWidget<MenuList>("Camera Speed");
-	cameraSpeedMenu.CreateWidget<OvUI::Widgets::Sliders::SliderInt>(1, 50, 15, OvUI::Widgets::Sliders::ESliderOrientation::HORIZONTAL, "Scene View");
-	cameraSpeedMenu.CreateWidget<OvUI::Widgets::Sliders::SliderInt>(1, 50, 15, OvUI::Widgets::Sliders::ESliderOrientation::HORIZONTAL, "Asset View");
+	cameraSpeedMenu.CreateWidget<OvUI::Widgets::Sliders::SliderInt>(1, 50, 15, OvUI::Widgets::Sliders::ESliderOrientation::HORIZONTAL, "Scene View").ValueChangedEvent += EDITOR_BIND(SetSceneViewCameraSpeed, std::placeholders::_1);
+	cameraSpeedMenu.CreateWidget<OvUI::Widgets::Sliders::SliderInt>(1, 50, 15, OvUI::Widgets::Sliders::ESliderOrientation::HORIZONTAL, "Asset View").ValueChangedEvent += EDITOR_BIND(SetAssetViewCameraSpeed, std::placeholders::_1);
 	auto& cameraPositionMenu = settingsMenu.CreateWidget<MenuList>("Reset Camera");
-	cameraPositionMenu.CreateWidget<MenuItem>("Scene View");
-	cameraPositionMenu.CreateWidget<MenuItem>("Asset View");
+	cameraPositionMenu.CreateWidget<MenuItem>("Scene View").ClickedEvent += EDITOR_BIND(ResetSceneViewCameraPosition);
+	cameraPositionMenu.CreateWidget<MenuItem>("Asset View").ClickedEvent += EDITOR_BIND(ResetAssetViewCameraPosition);
 
 	auto& viewColors = settingsMenu.CreateWidget<MenuList>("View Colors");
 	auto& sceneViewBackground = viewColors.CreateWidget<MenuList>("Scene View Background");
 	auto& sceneViewBackgroundPicker = sceneViewBackground.CreateWidget<Selection::ColorEdit>(false, OvUI::Types::Color{ 0.098f, 0.098f, 0.098f });
-
-	sceneViewBackground.CreateWidget<MenuItem>("Reset");
+	sceneViewBackgroundPicker.ColorChangedEvent += [this](const auto & color)
+	{
+		EDITOR_PANEL(Panels::SceneView, "Scene View").GetCamera().SetClearColor({ color.r, color.g, color.b });
+	};
+	sceneViewBackground.CreateWidget<MenuItem>("Reset").ClickedEvent += [this, &sceneViewBackgroundPicker]
+	{
+		EDITOR_PANEL(Panels::SceneView, "Scene View").GetCamera().SetClearColor({ 0.098f, 0.098f, 0.098f });
+		sceneViewBackgroundPicker.color = { 0.098f, 0.098f, 0.098f };
+	};
 
 	auto& sceneViewGrid = viewColors.CreateWidget<MenuList>("Scene View Grid");
     auto& sceneViewGridPicker = sceneViewGrid.CreateWidget<Selection::ColorEdit>(false, OvUI::Types::Color(0.176f, 0.176f, 0.176f));
-	sceneViewGridPicker.ColorChangedEvent ;
-	sceneViewGrid.CreateWidget<MenuItem>("Reset");
+	sceneViewGridPicker.ColorChangedEvent += [this](const auto & color)
+	{
+		EDITOR_PANEL(Panels::SceneView, "Scene View").SetGridColor({ color.r, color.g, color.b });
+	};
+	sceneViewGrid.CreateWidget<MenuItem>("Reset").ClickedEvent += [this, &sceneViewGridPicker]
+	{
+		EDITOR_PANEL(Panels::SceneView, "Scene View").SetGridColor(OvMaths::FVector3(0.176f, 0.176f, 0.176f));
+		sceneViewGridPicker.color = OvUI::Types::Color(0.176f, 0.176f, 0.176f);
+	};
 
 	auto& assetViewBackground = viewColors.CreateWidget<MenuList>("Asset View Background");
 	auto& assetViewBackgroundPicker = assetViewBackground.CreateWidget<Selection::ColorEdit>(false, OvUI::Types::Color{ 0.098f, 0.098f, 0.098f });
-	assetViewBackgroundPicker.ColorChangedEvent ;
-	assetViewBackground.CreateWidget<MenuItem>("Reset");
+	assetViewBackgroundPicker.ColorChangedEvent += [this](const auto & color)
+	{
+		EDITOR_PANEL(Panels::AssetView, "Asset View").GetCamera().SetClearColor({ color.r, color.g, color.b });
+	};
+	assetViewBackground.CreateWidget<MenuItem>("Reset").ClickedEvent += [this, &assetViewBackgroundPicker]
+	{
+		EDITOR_PANEL(Panels::AssetView, "Asset View").GetCamera().SetClearColor({ 0.098f, 0.098f, 0.098f });
+		assetViewBackgroundPicker.color = { 0.098f, 0.098f, 0.098f };
+	};
 
 	auto& assetViewGrid = viewColors.CreateWidget<MenuList>("Asset View Grid");
 	auto& assetViewGridPicker = assetViewGrid.CreateWidget<Selection::ColorEdit>(false, OvUI::Types::Color(0.176f, 0.176f, 0.176f));
-
-	assetViewGrid.CreateWidget<MenuItem>("Reset");
+	assetViewGridPicker.ColorChangedEvent += [this](const auto & color)
+	{
+		EDITOR_PANEL(Panels::AssetView, "Asset View").SetGridColor({ color.r, color.g, color.b });
+	};
+	assetViewGrid.CreateWidget<MenuItem>("Reset").ClickedEvent += [this, &assetViewGridPicker]
+	{
+		EDITOR_PANEL(Panels::AssetView, "Asset View").SetGridColor(OvMaths::FVector3(0.176f, 0.176f, 0.176f));
+		assetViewGridPicker.color = OvUI::Types::Color(0.176f, 0.176f, 0.176f);
+	};
 
 	auto& sceneViewBillboardScaleMenu = settingsMenu.CreateWidget<MenuList>("3D Icons Scales");
 	auto& lightBillboardScaleSlider = sceneViewBillboardScaleMenu.CreateWidget<Sliders::SliderInt>(0, 100, static_cast<int>(Settings::EditorSettings::LightBillboardScale * 100.0f), OvUI::Widgets::Sliders::ESliderOrientation::HORIZONTAL, "Lights");
@@ -137,7 +191,7 @@ void OvEditor::Panels::MenuBar::CreateSettingsMenu()
 void OvEditor::Panels::MenuBar::CreateLayoutMenu() 
 {
 	auto& layoutMenu = CreateWidget<MenuList>("Layout");
-	layoutMenu.CreateWidget<MenuItem>("Reset");
+	layoutMenu.CreateWidget<MenuItem>("Reset").ClickedEvent += EDITOR_BIND(ResetLayout);
 }
 
 void OvEditor::Panels::MenuBar::CreateHelpMenu()
