@@ -23,7 +23,8 @@ OvUI::Core::UIManager::~UIManager()
 void OvUI::Core::UIManager::ApplyStyle(Styling::EStyle p_style)
 {
     ImGuiStyle* style = &ImGui::GetStyle();
-
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
     switch (p_style)
     {
     case OvUI::Styling::EStyle::IM_CLASSIC_STYLE:	ImGui::StyleColorsClassic();	break;
@@ -161,8 +162,8 @@ void OvUI::Core::UIManager::ApplyStyle(Styling::EStyle p_style)
         colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
         colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
     }
-    else {
-        ImGuiIO& io = ImGui::GetIO();
+    else if(p_style == OvUI::Styling::EStyle::CUSTOM) {
+        
         ImGuiStyle& style = ImGui::GetStyle();
 
         // load fonts from the resource folder

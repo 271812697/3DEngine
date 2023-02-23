@@ -38,6 +38,7 @@ OvEditor::Panels::SceneView::SceneView
 void OvEditor::Panels::SceneView::Update(float p_deltaTime)
 {
 	AViewControllable::Update(p_deltaTime);
+    PrepareCamera();
 
 	using namespace OvWindowing::Inputs;
 
@@ -62,7 +63,7 @@ void OvEditor::Panels::SceneView::Update(float p_deltaTime)
 
 void OvEditor::Panels::SceneView::_Render_Impl()
 {
-	PrepareCamera();
+
 
 	auto& baseRenderer = *EDITOR_CONTEXT(renderer).get();
 
@@ -209,7 +210,9 @@ void OvEditor::Panels::SceneView::HandleActorPicking()
 
 		uint32_t actorID = (0 << 24) | (pixel[2] << 16) | (pixel[1] << 8) | (pixel[0] << 0);
 		auto actorUnderMouse = EDITOR_CONTEXT(sceneManager).GetCurrentScene()->FindActorByID(actorID);
-		auto direction = m_gizmoOperations.IsPicking() ? m_gizmoOperations.GetDirection() : EDITOR_EXEC(IsAnyActorSelected()) && pixel[0] == 255 && pixel[1] == 255 && pixel[2] >= 252 && pixel[2] <= 254 ? static_cast<OvEditor::Core::GizmoBehaviour::EDirection>(pixel[2] - 252) : std::optional<Core::GizmoBehaviour::EDirection>{};
+		auto direction = m_gizmoOperations.IsPicking() ? m_gizmoOperations.GetDirection() : EDITOR_EXEC(IsAnyActorSelected())
+            && pixel[0] == 255 && pixel[1] == 255 && pixel[2] >= 252 && pixel[2] <= 254 ? 
+            static_cast<OvEditor::Core::GizmoBehaviour::EDirection>(pixel[2] - 252) : std::optional<Core::GizmoBehaviour::EDirection>{};
 
 		m_highlightedActor = {};
 		m_highlightedGizmoDirection = {};

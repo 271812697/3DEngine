@@ -79,21 +79,24 @@ namespace OvWindowing::Inputs
 		* @note Should be called at the end of every game tick
 		*/
 		void ClearEvents();
+        float GetMouseScrollOffset()const;
 
 	private:
 		void OnKeyPressed(int p_key);
 		void OnKeyReleased(int p_key);
 		void OnMouseButtonPressed(int p_button);
 		void OnMouseButtonReleased(int p_button);
+        void OnMouseScroll(double delta);
 
 	private:
 		Window& m_window;
+
 
 		OvTools::Eventing::ListenerID m_keyPressedListener;
 		OvTools::Eventing::ListenerID m_keyReleasedListener;
 		OvTools::Eventing::ListenerID m_mouseButtonPressedListener;
 		OvTools::Eventing::ListenerID m_mouseButtonReleasedListener;
-
+        float wheel = 0.0f;
 		std::unordered_map<EKey, EKeyState>					m_keyEvents;
 		std::unordered_map<EMouseButton, EMouseButtonState>	m_mouseButtonEvents;
 	};

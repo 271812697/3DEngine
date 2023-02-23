@@ -11,6 +11,10 @@
 #include "OvCore/ECS/Components/CDirectionalLight.h"
 #include "OvCore/ECS/Components/CAmbientSphereLight.h"
 #include "OvCore/ECS/Components/CCamera.h"
+#include "OvCore/Global/ServiceLocator.h"
+#include "OvCore/ECS/Components/CMaterialRenderer.h"
+#include "OvCore/ResourceManagement/ModelManager.h"
+#include "OvCore/ResourceManagement/MaterialManager.h"
 
 OvCore::SceneSystem::SceneManager::SceneManager(const std::string& p_sceneRootFolder) : m_sceneRootFolder(p_sceneRootFolder)
 {
@@ -71,6 +75,15 @@ void OvCore::SceneSystem::SceneManager::LoadEmptyLightedScene()
 	camera.AddComponent<ECS::Components::CCamera>();
 	camera.transform.SetLocalPosition({ 0.0f, 3.0f, 8.0f });
 	camera.transform.SetLocalRotation(OvMaths::FQuaternion({ 20.0f, 180.0f, 0.0f }));
+
+    auto& cube=m_currentScene->CreateActor("Cube");
+    //m_context.editorResources->GetModel("Arrow_Translate");
+   
+    auto model=OvCore::Global::ServiceLocator::Get<OvCore::ResourceManagement::ModelManager>().GetResource(":Models/Cube.fbx"); 
+    auto material= OvCore::Global::ServiceLocator::Get<OvCore::ResourceManagement::MaterialManager>().GetResource(":Materials\\Default.ovmat");
+    cube.AddComponent<ECS::Components::CModelRenderer>().SetModel(model);
+    if(material)
+    cube.AddComponent<ECS::Components::CMaterialRenderer>().FillWithMaterial(*material);
 }
 
 bool OvCore::SceneSystem::SceneManager::LoadScene(const std::string& p_path, bool p_absolute)

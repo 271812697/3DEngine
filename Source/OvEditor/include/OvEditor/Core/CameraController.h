@@ -98,6 +98,7 @@ namespace OvEditor::Core
 		void HandleCameraZoom();
 		void HandleCameraFPSKeyboard(float p_deltaTime);
 		void UpdateMouseState();
+        void UpdateMouseState(bool hovered);
 
 	private:
 		OvWindowing::Inputs::InputManager& m_inputManager;

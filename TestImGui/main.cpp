@@ -719,6 +719,10 @@ namespace testimgui {
 
 
 }
+void mousecallback(GLFWwindow* p_window, int p_button, int p_action, int p_mods) {
+    std::cout << "do nothing" << std::endl;
+}
+
 int main(int, char**)
 {
 
@@ -735,6 +739,7 @@ int main(int, char**)
     if (window == NULL)
         return 1;
     glfwMakeContextCurrent(window);
+    glfwSetMouseButtonCallback(window, mousecallback);
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         throw std::exception("unable to glad");
     }
@@ -752,8 +757,8 @@ int main(int, char**)
     //io.ConfigViewportsNoTaskBarIcon = true;
 
     // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-    //ImGui::StyleColorsClassic();
+    //ImGui::StyleColorsDark();
+    ImGui::StyleColorsClassic();
 
     // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
     ImGuiStyle& style = ImGui::GetStyle();
@@ -780,6 +785,8 @@ int main(int, char**)
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+        ImGui::Text("the mouse is %f",ImGui::GetIO().MouseWheel);
+        
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);

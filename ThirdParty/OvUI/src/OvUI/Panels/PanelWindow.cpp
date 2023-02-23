@@ -167,6 +167,10 @@ void OvUI::Panels::PanelWindow::_Draw_Impl()
 
 			DrawWidgets();
 		}
+        else {
+            m_hovered = false;
+            m_focused = false;
+        }
 
 		ImGui::End();
 	}

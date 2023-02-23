@@ -101,12 +101,20 @@ float GetActorFocusDist(OvCore::ECS::Actor& p_actor)
 
 void OvEditor::Core::CameraController::HandleInputs(float p_deltaTime)
 {
+    
+
+    //
 	if (m_view.IsHovered())
 	{
-		UpdateMouseState();
+       
+        UpdateMouseState(true);
 
-        //ImGui::GetIO().WantCaptureMouse =(m_rightMousePressed || m_middleMousePressed);
+        ////io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
 
+        //ImGui::GetIO().ConfigFlags &=(m_rightMousePressed || m_middleMousePressed)? ImGuiConfigFlags_NoMouse:(~ImGuiConfigFlags_NoMouse);
+       // ImGui::GetIO().WantCaptureMouse = (m_rightMousePressed || m_middleMousePressed);
+
+        //
 		if (!ImGui::IsAnyItemActive() && m_enableFocusInputs)
 		{
 			if (EDITOR_EXEC(IsAnyActorSelected()))
@@ -137,7 +145,9 @@ void OvEditor::Core::CameraController::HandleInputs(float p_deltaTime)
 			}
 		}
 	}
+    UpdateMouseState(false);
 
+    //lerp the camera
 	if (!m_cameraDestinations.empty())
 	{
 		m_currentMovementSpeed = 0.0f;
@@ -163,7 +173,7 @@ void OvEditor::Core::CameraController::HandleInputs(float p_deltaTime)
 	} 
 	else
 	{
-		if (m_rightMousePressed || m_middleMousePressed || m_leftMousePressed)
+		if (m_rightMousePressed || m_middleMousePressed )
 		{
 			auto [xPos, yPos] = m_inputManager.GetMousePosition();
 
@@ -210,6 +220,7 @@ void OvEditor::Core::CameraController::HandleInputs(float p_deltaTime)
 
 		if (m_view.IsHovered())
 		{
+            
 			HandleCameraZoom();
 		}
 
@@ -311,7 +322,10 @@ void OvEditor::Core::CameraController::HandleCameraOrbit(const OvMaths::FVector2
 
 void OvEditor::Core::CameraController::HandleCameraZoom()
 {
-	m_cameraPosition += m_cameraRotation * OvMaths::FVector3::Forward * ImGui::GetIO().MouseWheel;
+   
+  
+    m_cameraPosition += m_cameraRotation * OvMaths::FVector3::Forward * m_inputManager.GetMouseScrollOffset();// ;
+    
 }
 
 void OvEditor::Core::CameraController::HandleCameraFPSMouse(const OvMaths::FVector2& p_mouseOffset, bool p_firstMouse)
@@ -391,3 +405,48 @@ void OvEditor::Core::CameraController::UpdateMouseState()
 		m_window.SetCursorMode(OvWindowing::Cursor::ECursorMode::NORMAL);
 	}
 }
+
+void OvEditor::Core::CameraController::UpdateMouseState(bool hovered)
+{
+    if (hovered) {
+        if (m_inputManager.IsMouseButtonPressed(OvWindowing::Inputs::EMouseButton::MOUSE_BUTTON_LEFT))
+            m_leftMousePressed = true;
+
+
+
+        if (m_inputManager.IsMouseButtonPressed(OvWindowing::Inputs::EMouseButton::MOUSE_BUTTON_MIDDLE))
+            m_middleMousePressed = true;
+
+
+
+        if (m_inputManager.IsMouseButtonPressed(OvWindowing::Inputs::EMouseButton::MOUSE_BUTTON_RIGHT))
+        {
+            m_rightMousePressed = true;
+            m_window.SetCursorMode(OvWindowing::Cursor::ECursorMode::DISABLED);
+        }
+    }
+    else {
+
+        if (m_inputManager.IsMouseButtonReleased(OvWindowing::Inputs::EMouseButton::MOUSE_BUTTON_LEFT))
+        {
+            m_leftMousePressed = false;
+            m_firstMouse = true;
+        }
+
+        if (m_inputManager.IsMouseButtonReleased(OvWindowing::Inputs::EMouseButton::MOUSE_BUTTON_MIDDLE))
+        {
+            m_middleMousePressed = false;
+            m_firstMouse = true;
+        }
+
+
+
+        if (m_inputManager.IsMouseButtonReleased(OvWindowing::Inputs::EMouseButton::MOUSE_BUTTON_RIGHT))
+        {
+            m_rightMousePressed = false;
+            m_firstMouse = true;
+            m_window.SetCursorMode(OvWindowing::Cursor::ECursorMode::NORMAL);
+        }
+    }
+}
+

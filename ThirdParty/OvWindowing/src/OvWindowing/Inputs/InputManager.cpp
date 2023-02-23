@@ -15,6 +15,7 @@ OvWindowing::Inputs::InputManager::InputManager(Window& p_window) : m_window(p_w
 	m_keyReleasedListener = m_window.KeyReleasedEvent.AddListener(std::bind(&InputManager::OnKeyReleased, this, std::placeholders::_1));
 	m_mouseButtonPressedListener = m_window.MouseButtonPressedEvent.AddListener(std::bind(&InputManager::OnMouseButtonPressed, this, std::placeholders::_1));
 	m_mouseButtonReleasedListener = m_window.MouseButtonReleasedEvent.AddListener(std::bind(&InputManager::OnMouseButtonReleased, this, std::placeholders::_1));
+    m_window.MouseScroolEvent.AddListener(std::bind(&InputManager::OnMouseScroll,this,std::placeholders::_1));
 }
 
 OvWindowing::Inputs::InputManager::~InputManager()
@@ -78,6 +79,12 @@ void OvWindowing::Inputs::InputManager::ClearEvents()
 {
 	m_keyEvents.clear();
 	m_mouseButtonEvents.clear();
+    wheel = 0;
+}
+
+float OvWindowing::Inputs::InputManager::GetMouseScrollOffset() const
+{
+    return wheel;
 }
 
 void OvWindowing::Inputs::InputManager::OnKeyPressed(int p_key)
@@ -98,4 +105,9 @@ void OvWindowing::Inputs::InputManager::OnMouseButtonPressed(int p_button)
 void OvWindowing::Inputs::InputManager::OnMouseButtonReleased(int p_button)
 {
 	m_mouseButtonEvents[static_cast<EMouseButton>(p_button)] = EMouseButtonState::MOUSE_UP;
+}
+
+void OvWindowing::Inputs::InputManager::OnMouseScroll(double delta)
+{
+    wheel += delta;
 }

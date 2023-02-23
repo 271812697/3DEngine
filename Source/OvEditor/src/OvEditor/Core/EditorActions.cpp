@@ -460,7 +460,7 @@ void OvEditor::Core::EditorActions::StopPlaying()
 	if (m_editorMode != EEditorMode::EDIT)
 	{
 		//ImGui::GetIO().DisableMouseUpdate = false;
-        ImGui::GetIO().WantCaptureMouse = false;
+       // ImGui::GetIO().WantCaptureMouse = false;
 		m_context.window->SetCursorMode(OvWindowing::Cursor::ECursorMode::NORMAL);
 		SetEditorMode(EEditorMode::EDIT);
 		bool loadedFromDisk = m_context.sceneManager.IsCurrentSceneLoadedFromDisk();
