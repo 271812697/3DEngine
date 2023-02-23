@@ -54,6 +54,7 @@ namespace OvEditor::Panels
 		void HandleActorPicking();
 
 	private:
+		OvRendering::Buffers::Framebuffer m_mulfbo;
 		OvCore::SceneSystem::SceneManager& m_sceneManager;
 		OvRendering::Buffers::Framebuffer m_actorPickingFramebuffer;
 		OvEditor::Core::GizmoBehaviour m_gizmoOperations;

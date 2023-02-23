@@ -121,5 +121,6 @@ namespace OvEditor::Panels
         OvMaths::FVector3 m_gridColor = OvMaths::FVector3 { 0.176f, 0.176f, 0.176f };
 
 		OvRendering::Buffers::Framebuffer m_fbo;
+		
 	};
 }
