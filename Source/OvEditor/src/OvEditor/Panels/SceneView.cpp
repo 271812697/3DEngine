@@ -95,11 +95,11 @@ void OvEditor::Panels::SceneView::RenderScene(uint8_t p_defaultRenderState)
 	auto [winWidth, winHeight] = GetSafeSize();
 
 	m_mulfbo.Resize(winWidth, winHeight);
-	m_fbo.Bind();
-	//m_mulfbo.Bind();
+	//m_fbo.Bind();
+	m_mulfbo.Bind();
 	baseRenderer.SetStencilMask(0xFF);
 	baseRenderer.Clear(m_camera);
-	//baseRenderer.SetStencilMask(0x00);
+	baseRenderer.SetStencilMask(0x00);
 	baseRenderer.SetCapability(OvRendering::Settings::ERenderingCapability::MULTISAMPLE,true);
 
 	m_editorRenderer.RenderGrid(m_cameraPosition, m_gridColor);
@@ -149,11 +149,11 @@ void OvEditor::Panels::SceneView::RenderScene(uint8_t p_defaultRenderState)
 		baseRenderer.ApplyStateMask(p_defaultRenderState);
 		m_editorRenderer.RenderActorOutlinePass(m_highlightedActor.value().get(), false, false);
 	}
-	//m_mulfbo.Unbind();
-	m_fbo.Unbind();
-	//glNamedFramebufferReadBuffer(m_mulfbo.GetID(), GL_COLOR_ATTACHMENT0);
-	//glNamedFramebufferDrawBuffer(m_fbo.GetID(), GL_COLOR_ATTACHMENT0);
-	//glBlitNamedFramebuffer(m_mulfbo.GetID(), m_fbo.GetID(), 0, 0, winWidth, winHeight, 0, 0, winWidth, winHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	m_mulfbo.Unbind();
+	//m_fbo.Unbind();
+	glNamedFramebufferReadBuffer(m_mulfbo.GetID(), GL_COLOR_ATTACHMENT0);
+	glNamedFramebufferDrawBuffer(m_fbo.GetID(), GL_COLOR_ATTACHMENT0);
+	glBlitNamedFramebuffer(m_mulfbo.GetID(), m_fbo.GetID(), 0, 0, winWidth, winHeight, 0, 0, winWidth, winHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 	//m_fbo.Unbind();
 }
 
