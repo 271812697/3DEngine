@@ -13,6 +13,7 @@
 #include <OvRendering/Buffers/Framebuffer.h>
 #include <OvRendering/LowRenderer/Camera.h>
 
+
 namespace OvEditor::Core { class EditorRenderer; }
 
 namespace OvEditor::Panels
@@ -120,7 +121,7 @@ namespace OvEditor::Panels
 
         OvMaths::FVector3 m_gridColor = OvMaths::FVector3 { 0.176f, 0.176f, 0.176f };
 
-		OvRendering::Buffers::Framebuffer m_fbo;
+		std::unique_ptr<OvRendering::Buffers::Framebuffer> m_fbo;
 		
 	};
 }

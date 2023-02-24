@@ -8,6 +8,7 @@
 
 #include "OvEditor/Panels/AViewControllable.h"
 #include "OvEditor/Core/GizmoBehaviour.h"
+#include "OvEditor/Utils/ext.h"
 
 namespace OvEditor::Panels
 {
@@ -54,12 +55,14 @@ namespace OvEditor::Panels
 		void HandleActorPicking();
 
 	private:
-		OvRendering::Buffers::Framebuffer m_mulfbo;
+		std::unique_ptr<OvRendering::Buffers::Framebuffer> m_mulfbo;
 		OvCore::SceneSystem::SceneManager& m_sceneManager;
-		OvRendering::Buffers::Framebuffer m_actorPickingFramebuffer;
+		std::unique_ptr<OvRendering::Buffers::Framebuffer> m_actorPickingFramebuffer;
 		OvEditor::Core::GizmoBehaviour m_gizmoOperations;
 		OvEditor::Core::EGizmoOperation m_currentOperation = OvEditor::Core::EGizmoOperation::TRANSLATE;
-
+		std::shared_ptr<asset::Texture>irradiance_map;
+		std::shared_ptr<asset::Texture>prefiltered_map;
+		std::shared_ptr<asset::Texture>BRDF_LUT;
 		std::optional<std::reference_wrapper<OvCore::ECS::Actor>> m_highlightedActor;
 		std::optional<OvEditor::Core::GizmoBehaviour::EDirection> m_highlightedGizmoDirection;
 	};

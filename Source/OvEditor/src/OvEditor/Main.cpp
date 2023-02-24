@@ -15,6 +15,7 @@
 
 #undef APIENTRY
 #include "Windows.h"
+#include "Opengl/core/log.h"
 
 FORCE_DEDICATED_GPU
 
@@ -86,7 +87,7 @@ static void TryRun(const std::string& projectPath, const std::string& projectNam
 		};
 
 	std::unique_ptr<OvEditor::Core::Application> app;
-
+	core::Log::Init();
 	try
 	{
 		auto listenerId = OvWindowing::Context::Device::ErrorEvent += errorEvent;
@@ -97,4 +98,5 @@ static void TryRun(const std::string& projectPath, const std::string& projectNam
 
 	if (app)
 		app->Run();
+	core::Log::Shutdown();
 }

@@ -23,7 +23,7 @@ namespace OvRendering::Buffers
 		* @param p_width
 		* @param p_height
 		*/
-		Framebuffer(uint16_t p_width = 0, uint16_t p_height = 0,bool multisample=false);
+		Framebuffer(uint16_t p_width = 0, uint16_t p_height = 0);
 
 		/**
 		* Destructor

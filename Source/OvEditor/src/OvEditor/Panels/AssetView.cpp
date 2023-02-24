@@ -52,7 +52,7 @@ void OvEditor::Panels::AssetView::_Render_Impl()
 
 	auto& baseRenderer = *EDITOR_CONTEXT(renderer).get();
 
-	m_fbo.Bind();
+	m_fbo->Bind();
 
 	baseRenderer.SetStencilMask(0xFF);
 	baseRenderer.Clear(m_camera);
@@ -74,7 +74,7 @@ void OvEditor::Panels::AssetView::_Render_Impl()
 
 	baseRenderer.ApplyStateMask(glState);
 
-	m_fbo.Unbind();
+	m_fbo->Unbind();
 }
 
 void OvEditor::Panels::AssetView::SetResource(ViewableResource p_resource)

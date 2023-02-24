@@ -18,8 +18,11 @@ OvEditor::Panels::AView::AView
 {
 	m_cameraPosition = { -10.0f, 3.0f, 10.0f };
 	m_cameraRotation = OvMaths::FQuaternion({0.0f, 135.0f, 0.0f});
+	m_fbo = std::make_unique<OvRendering::Buffers::Framebuffer>(1,1);
+	m_fbo->AddColorTexture(1);
+	m_fbo->AddDepStRenderBuffer();
 
-	m_image = &CreateWidget<OvUI::Widgets::Visual::Image>(m_fbo.GetTextureID(), OvMaths::FVector2{ 0.f, 0.f });
+	m_image = &CreateWidget<OvUI::Widgets::Visual::Image>(m_fbo->GetTextureID(), OvMaths::FVector2{ 0.f, 0.f });
 
     scrollable = false;
 }
@@ -30,7 +33,7 @@ void OvEditor::Panels::AView::Update(float p_deltaTime)
 
 	m_image->size = OvMaths::FVector2(static_cast<float>(winWidth), static_cast<float>(winHeight));
 
-	m_fbo.Resize(winWidth, winHeight);
+	m_fbo->Resize(winWidth, winHeight);
 }
 
 void OvEditor::Panels::AView::_Draw_Impl()

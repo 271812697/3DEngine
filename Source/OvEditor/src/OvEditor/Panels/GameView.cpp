@@ -50,7 +50,7 @@ void OvEditor::Panels::GameView::_Render_Impl()
 	auto& baseRenderer = *EDITOR_CONTEXT(renderer).get();
 	auto& currentScene = *m_sceneManager.GetCurrentScene();
 
-	m_fbo.Bind();
+	m_fbo->Bind();
 
 	baseRenderer.Clear(m_camera);
 
@@ -73,7 +73,7 @@ void OvEditor::Panels::GameView::_Render_Impl()
 
 	baseRenderer.ApplyStateMask(glState);
 
-	m_fbo.Unbind();
+	m_fbo->Unbind();
 }
 
 bool OvEditor::Panels::GameView::HasCamera() const

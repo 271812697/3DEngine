@@ -11,6 +11,8 @@
 #include "OvEditor/Panels/SceneView.h"
 #include "OvEditor/Panels/GameView.h"
 #include "OvEditor/Settings/EditorSettings.h"
+#include "stb_image/stb_image.h"
+#include "stb_image/stb_image_write.h"
 
 OvEditor::Panels::SceneView::SceneView
 (
@@ -18,9 +20,31 @@ OvEditor::Panels::SceneView::SceneView
 	bool p_opened,
 	const OvUI::Settings::PanelWindowSettings& p_windowSettings
 ) : AViewControllable(p_title, p_opened, p_windowSettings, true),
-	m_sceneManager(EDITOR_CONTEXT(sceneManager)),
-	m_mulfbo(0,0,true)
+	m_sceneManager(EDITOR_CONTEXT(sceneManager))
+	
 {
+	m_mulfbo = std::make_unique<OvRendering::Buffers::Framebuffer>(1, 1);
+	m_mulfbo->AddColorTexture(1, true);
+	m_mulfbo->AddDepStRenderBuffer(true);
+
+	std::tie(irradiance_map, prefiltered_map, BRDF_LUT)=
+		Ext::PrecomputeIBL("Resource\\texture\\HDRI\\Field-Path-Fence-Steinbacher-Street-4K.hdr");
+	unsigned char* data;
+	 data=new unsigned char[BRDF_LUT->width * BRDF_LUT ->height* 4];
+	glActiveTexture(GL_TEXTURE0);
+
+
+    glBindTexture(GL_TEXTURE_2D, BRDF_LUT->ID());
+
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	stbi_flip_vertically_on_write(true);
+	stbi_write_png("res.png", BRDF_LUT->width, BRDF_LUT->height, 4, data, BRDF_LUT->width * 4);
+	free(data);
+
+	m_image->textureID.id = 2;
+	m_actorPickingFramebuffer = std::make_unique<OvRendering::Buffers::Framebuffer>(1, 1);
+	m_actorPickingFramebuffer->AddColorTexture(1);
+	m_actorPickingFramebuffer->AddDepStRenderBuffer();
 	m_camera.SetClearColor({ 0.098f, 0.098f, 0.098f });
 	m_camera.SetFar(5000.0f);
 
@@ -94,9 +118,9 @@ void OvEditor::Panels::SceneView::RenderScene(uint8_t p_defaultRenderState)
 
 	auto [winWidth, winHeight] = GetSafeSize();
 
-	m_mulfbo.Resize(winWidth, winHeight);
+	m_mulfbo->Resize(winWidth, winHeight);
 	//m_fbo.Bind();
-	m_mulfbo.Bind();
+	m_mulfbo->Bind();
 	baseRenderer.SetStencilMask(0xFF);
 	baseRenderer.Clear(m_camera);
 	baseRenderer.SetStencilMask(0x00);
@@ -149,11 +173,11 @@ void OvEditor::Panels::SceneView::RenderScene(uint8_t p_defaultRenderState)
 		baseRenderer.ApplyStateMask(p_defaultRenderState);
 		m_editorRenderer.RenderActorOutlinePass(m_highlightedActor.value().get(), false, false);
 	}
-	m_mulfbo.Unbind();
+	m_mulfbo->Unbind();
 	//m_fbo.Unbind();
-	glNamedFramebufferReadBuffer(m_mulfbo.GetID(), GL_COLOR_ATTACHMENT0);
-	glNamedFramebufferDrawBuffer(m_fbo.GetID(), GL_COLOR_ATTACHMENT0);
-	glBlitNamedFramebuffer(m_mulfbo.GetID(), m_fbo.GetID(), 0, 0, winWidth, winHeight, 0, 0, winWidth, winHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	glNamedFramebufferReadBuffer(m_mulfbo->GetID(), GL_COLOR_ATTACHMENT0);
+	glNamedFramebufferDrawBuffer(m_fbo->GetID(), GL_COLOR_ATTACHMENT0);
+	glBlitNamedFramebuffer(m_mulfbo->GetID(), m_fbo->GetID(), 0, 0, winWidth, winHeight, 0, 0, winWidth, winHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 	//m_fbo.Unbind();
 }
 
@@ -163,8 +187,8 @@ void OvEditor::Panels::SceneView::RenderSceneForActorPicking()
 
 	auto [winWidth, winHeight] = GetSafeSize();
 
-	m_actorPickingFramebuffer.Resize(winWidth, winHeight);
-	m_actorPickingFramebuffer.Bind();
+	m_actorPickingFramebuffer->Resize(winWidth, winHeight);
+	m_actorPickingFramebuffer->Bind();
 	baseRenderer.SetClearColor(1.0f, 1.0f, 1.0f);
 	baseRenderer.Clear();
 	m_editorRenderer.RenderSceneForActorPicking();
@@ -176,7 +200,7 @@ void OvEditor::Panels::SceneView::RenderSceneForActorPicking()
 		m_editorRenderer.RenderGizmo(selectedActor.transform.GetWorldPosition(), selectedActor.transform.GetWorldRotation(), m_currentOperation, true);
 	}
 
-	m_actorPickingFramebuffer.Unbind();
+	m_actorPickingFramebuffer->Unbind();
 }
 
 bool IsResizing()
@@ -212,10 +236,10 @@ void OvEditor::Panels::SceneView::HandleActorPicking()
 		mouseY -= m_position.y;
 		mouseY = GetSafeSize().second - mouseY + 25;
 
-		m_actorPickingFramebuffer.Bind();
+		m_actorPickingFramebuffer->Bind();
 		uint8_t pixel[3];
 		EDITOR_CONTEXT(renderer)->ReadPixels(static_cast<int>(mouseX), static_cast<int>(mouseY), 1, 1, OvRendering::Settings::EPixelDataFormat::RGB, OvRendering::Settings::EPixelDataType::UNSIGNED_BYTE, pixel);
-		m_actorPickingFramebuffer.Unbind();
+		m_actorPickingFramebuffer->Unbind();
 
 		uint32_t actorID = (0 << 24) | (pixel[2] << 16) | (pixel[1] << 8) | (pixel[0] << 0);
 		auto actorUnderMouse = EDITOR_CONTEXT(sceneManager).GetCurrentScene()->FindActorByID(actorID);

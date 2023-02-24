@@ -8,14 +8,14 @@
 
 #include "OvRendering/Buffers/Framebuffer.h"
 
-OvRendering::Buffers::Framebuffer::Framebuffer(uint16_t p_width, uint16_t p_height,bool multisample)
-	:width(p_width),height(p_height), is_multisample(multisample)
+OvRendering::Buffers::Framebuffer::Framebuffer(uint16_t p_width, uint16_t p_height)
+	:width(p_width),height(p_height)
 {
 
 	/* Generate OpenGL objects */
 	glCreateFramebuffers(1, &m_bufferID);
-	AddColorTexture(1, multisample);
-    AddDepStRenderBuffer(multisample);
+	//AddColorTexture(1, multisample);
+    //AddDepStRenderBuffer(multisample);
 }
 
 OvRendering::Buffers::Framebuffer::~Framebuffer()
