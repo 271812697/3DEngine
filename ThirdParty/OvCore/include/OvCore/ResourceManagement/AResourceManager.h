@@ -33,7 +33,7 @@ namespace OvCore::ResourceManagement
 		void UnloadResource(const std::string& p_path);
 
 		/**
-		* Move a resource to the new given id (path)
+		* Move a resource to the new given id (pathReloadResource
 		* @param p_previousPath
 		* @param p_newPath
 		*/
@@ -78,6 +78,7 @@ namespace OvCore::ResourceManagement
 		* @param p_path
 		* @param p_tryToLoadIfNotFound
 		*/
+
 		T* GetResource(const std::string& p_path, bool p_tryToLoadIfNotFound = true);
 
 		/**

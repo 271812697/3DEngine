@@ -24,6 +24,8 @@ namespace OvCore::ResourceManagement
 		*/
 		virtual OvRendering::Resources::Texture* CreateResource(const std::string & p_path) override;
 
+
+
 		/**
 		* Destroy the given resource
 		* @param p_resource

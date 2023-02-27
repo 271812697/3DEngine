@@ -42,7 +42,7 @@ void OvCore::Resources::Material::Bind(OvRendering::Resources::Texture* p_emptyT
 
 		m_shader->Bind();
 
-		int textureSlot = 0;
+		int textureSlot = 10;
 
 		for (auto&[name, value] : m_uniformsData)
 		{
@@ -50,31 +50,35 @@ void OvCore::Resources::Material::Bind(OvRendering::Resources::Texture* p_emptyT
 
 			if (uniformData)
 			{
-				switch (uniformData->type)
-				{
-				case OvRendering::Resources::UniformType::UNIFORM_BOOL:			if (value.type() == typeid(bool))		m_shader->SetUniformInt(name, std::any_cast<bool>(value));			break;
-				case OvRendering::Resources::UniformType::UNIFORM_INT:			if (value.type() == typeid(int))		m_shader->SetUniformInt(name, std::any_cast<int>(value));			break;
-				case OvRendering::Resources::UniformType::UNIFORM_FLOAT:		if (value.type() == typeid(float))		m_shader->SetUniformFloat(name, std::any_cast<float>(value));		break;
-				case OvRendering::Resources::UniformType::UNIFORM_FLOAT_VEC2:	if (value.type() == typeid(FVector2))	m_shader->SetUniformVec2(name, std::any_cast<FVector2>(value));		break;
-				case OvRendering::Resources::UniformType::UNIFORM_FLOAT_VEC3:	if (value.type() == typeid(FVector3))	m_shader->SetUniformVec3(name, std::any_cast<FVector3>(value));		break;
-				case OvRendering::Resources::UniformType::UNIFORM_FLOAT_VEC4:	if (value.type() == typeid(FVector4))	m_shader->SetUniformVec4(name, std::any_cast<FVector4>(value));		break;
-				case OvRendering::Resources::UniformType::UNIFORM_SAMPLER_2D:
-					{
-						if (value.type() == typeid(Texture*))
-						{
-							if (auto tex = std::any_cast<Texture*>(value); tex)
-							{
-								tex->Bind(textureSlot);
-								m_shader->SetUniformInt(uniformData->name, textureSlot++);
-							}
-							else if (p_emptyTexture)
-							{
-								p_emptyTexture->Bind(textureSlot);
-								m_shader->SetUniformInt(uniformData->name, textureSlot++);
-							}
-						}
-					}
-				}
+                switch (uniformData->type)
+                {
+                case OvRendering::Resources::UniformType::UNIFORM_BOOL:			if (value.type() == typeid(bool))		  m_shader->SetUniformInt(name, std::any_cast<bool>(value));			break;
+                case OvRendering::Resources::UniformType::UNIFORM_INT:			if (value.type() == typeid(int))		  m_shader->SetUniformInt(name, std::any_cast<int>(value));			break;
+                case OvRendering::Resources::UniformType::UNIFORM_UINT:			if (value.type() == typeid(unsigned int)) m_shader->SetUniformUint(name, std::any_cast<unsigned int>(value));			break;
+                case OvRendering::Resources::UniformType::UNIFORM_FLOAT:		if (value.type() == typeid(float))		  m_shader->SetUniformFloat(name, std::any_cast<float>(value));		break;
+                case OvRendering::Resources::UniformType::UNIFORM_FLOAT_VEC2:	if (value.type() == typeid(FVector2))	  m_shader->SetUniformVec2(name, std::any_cast<FVector2>(value));		break;
+                case OvRendering::Resources::UniformType::UNIFORM_FLOAT_VEC3:	if (value.type() == typeid(FVector3))	  m_shader->SetUniformVec3(name, std::any_cast<FVector3>(value));		break;
+                case OvRendering::Resources::UniformType::UNIFORM_FLOAT_VEC4:	if (value.type() == typeid(FVector4))	  m_shader->SetUniformVec4(name, std::any_cast<FVector4>(value));		break;
+                case OvRendering::Resources::UniformType::UNIFORM_FLOAT_MAT4:	if (value.type() == typeid(FMatrix4))	  m_shader->SetUniformMat4(name, std::any_cast<FMatrix4>(value));		break;
+                case OvRendering::Resources::UniformType::UNIFORM_SAMPLER_2D:
+                {
+                    if (value.type() == typeid(Texture*))
+                    {
+                        if (auto tex = std::any_cast<Texture*>(value); tex)
+                        {
+                            glBindTextureUnit(textureSlot, tex->id);
+                            m_shader->SetUniformInt(uniformData->name, textureSlot++);
+                        }
+                        else if (p_emptyTexture)
+                        {
+                            glBindTextureUnit(textureSlot, p_emptyTexture->id);
+                            m_shader->SetUniformInt(uniformData->name, textureSlot++);
+                        }
+                    }
+                }; break;
+                
+                }
+   
 			}
 		}
 	}
@@ -230,6 +234,10 @@ void OvCore::Resources::Material::OnSerialize(tinyxml2::XMLDocument & p_doc, tin
 				if (uniformValue.type() == typeid(int)) Serializer::SerializeInt(p_doc, uniform, "value", std::any_cast<int>(uniformValue));
 				break;
 
+            case UniformType::UNIFORM_UINT:
+                if (uniformValue.type() == typeid(unsigned int)) Serializer::SerializeUint(p_doc, uniform, "value", std::any_cast<unsigned int>(uniformValue));
+                break;
+
 			case UniformType::UNIFORM_FLOAT:
 				if (uniformValue.type() == typeid(float)) Serializer::SerializeFloat(p_doc, uniform, "value", std::any_cast<float>(uniformValue));
 				break;
@@ -245,6 +253,9 @@ void OvCore::Resources::Material::OnSerialize(tinyxml2::XMLDocument & p_doc, tin
 			case UniformType::UNIFORM_FLOAT_VEC4:
 				if (uniformValue.type() == typeid(FVector4)) Serializer::SerializeVec4(p_doc, uniform, "value", std::any_cast<FVector4>(uniformValue));
 				break;
+            case UniformType::UNIFORM_FLOAT_MAT4:
+                if (uniformValue.type() == typeid(FMatrix4)) Serializer::SerializeFmatrix4(p_doc, uniform, "value", std::any_cast<FMatrix4>(uniformValue));
+                break;
 
 			case UniformType::UNIFORM_SAMPLER_2D:
 				if (uniformValue.type() == typeid(Texture*)) Serializer::SerializeTexture(p_doc, uniform, "value", std::any_cast<Texture*>(uniformValue));
@@ -309,6 +320,10 @@ void OvCore::Resources::Material::OnDeserialize(tinyxml2::XMLDocument & p_doc, t
 							m_uniformsData[uniformInfo->name] = OvCore::Helpers::Serializer::DeserializeInt(p_doc, uniform, "value");
 							break;
 
+                        case OvRendering::Resources::UniformType::UNIFORM_UINT:
+                            m_uniformsData[uniformInfo->name] = OvCore::Helpers::Serializer::DeserializeUint(p_doc, uniform, "value");
+                            break;
+
 						case OvRendering::Resources::UniformType::UNIFORM_FLOAT:
 							m_uniformsData[uniformInfo->name] = OvCore::Helpers::Serializer::DeserializeFloat(p_doc, uniform, "value");
 							break;
@@ -324,6 +339,9 @@ void OvCore::Resources::Material::OnDeserialize(tinyxml2::XMLDocument & p_doc, t
 						case OvRendering::Resources::UniformType::UNIFORM_FLOAT_VEC4:
 							m_uniformsData[uniformInfo->name] = OvCore::Helpers::Serializer::DeserializeVec4(p_doc, uniform, "value");
 							break;
+                        case OvRendering::Resources::UniformType::UNIFORM_FLOAT_MAT4:
+                            m_uniformsData[uniformInfo->name] = OvCore::Helpers::Serializer::DeserializeFmatrix4(p_doc, uniform, "value");
+                            break;
 
 						case OvRendering::Resources::UniformType::UNIFORM_SAMPLER_2D:
 							m_uniformsData[uniformInfo->name] = OvCore::Helpers::Serializer::DeserializeTexture(p_doc, uniform, "value");

@@ -115,6 +115,22 @@ void OvCore::Helpers::Serializer::SerializeVec4(tinyxml2::XMLDocument & p_doc, t
 	element->InsertEndChild(w);
 }
 
+void OvCore::Helpers::Serializer::SerializeFmatrix4(tinyxml2::XMLDocument& p_doc, tinyxml2::XMLNode* p_node, const std::string& p_name, const OvMaths::FMatrix4& p_value)
+{
+    OvMaths::FVector4 R[4];
+    memcpy(&R[0].x,p_value.data, 16 * sizeof(float));
+
+    tinyxml2::XMLNode* element = p_doc.NewElement(p_name.c_str());
+    p_node->InsertEndChild(element);
+    SerializeVec4(p_doc,element,"R1",R[0]);
+    SerializeVec4(p_doc, element, "R2", R[1]);
+    SerializeVec4(p_doc, element, "R3", R[2]);
+    SerializeVec4(p_doc, element, "R4", R[3]);
+
+
+
+}
+
 void OvCore::Helpers::Serializer::SerializeQuat(tinyxml2::XMLDocument & p_doc, tinyxml2::XMLNode * p_node, const std::string & p_name, const OvMaths::FQuaternion & p_value)
 {
 	tinyxml2::XMLNode* element = p_doc.NewElement(p_name.c_str());
@@ -418,6 +434,23 @@ OvMaths::FVector4 OvCore::Helpers::Serializer::DeserializeVec4(tinyxml2::XMLDocu
 	OvMaths::FVector4 result;
 	DeserializeVec4(p_doc, p_node, p_name, result);
 	return result;
+}
+
+OvMaths::FMatrix4 OvCore::Helpers::Serializer::DeserializeFmatrix4(tinyxml2::XMLDocument& p_doc, tinyxml2::XMLNode* p_node, const std::string& p_name)
+{
+    if (auto node = p_node->FirstChildElement(p_name.c_str()); node)
+    {
+
+        OvMaths::FVector4 R[4];
+        DeserializeVec4(p_doc, p_node, "R1", R[0]);
+        DeserializeVec4(p_doc, p_node, "R2", R[1]);
+        DeserializeVec4(p_doc, p_node, "R3", R[2]);
+        DeserializeVec4(p_doc, p_node, "R4", R[3]);
+        OvMaths::FMatrix4 result;
+        memcpy(result.data, &R[0].x, 16 * sizeof(float));
+        return result;
+    }
+	return OvMaths::FMatrix4();
 }
 
 OvMaths::FQuaternion OvCore::Helpers::Serializer::DeserializeQuat(tinyxml2::XMLDocument & p_doc, tinyxml2::XMLNode * p_node, const std::string & p_name)

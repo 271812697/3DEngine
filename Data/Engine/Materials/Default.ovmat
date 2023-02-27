@@ -1,5 +1,5 @@
 <root>
-    <shader>:Shaders\Standard.glsl</shader>
+    <shader>:Shaders\StandardPBR.glsl</shader>
     <settings>
         <blendable>false</blendable>
         <backface_culling>false</backface_culling>
@@ -11,7 +11,7 @@
     </settings>
     <uniforms>
         <uniform>
-            <name>u_Diffuse</name>
+            <name>u_Albedo</name>
             <value>
                 <x>1</x>
                 <y>1</y>
@@ -20,44 +20,36 @@
             </value>
         </uniform>
         <uniform>
-            <name>u_DiffuseMap</name>
-            <value>?</value>
+            <name>u_AlbedoMap</name>
+            <value>:pbr\plastic\albedo.png</value>
+        </uniform>
+        <uniform>
+            <name>u_AmbientOcclusionMap</name>
+            <value>:pbr\plastic\ao.png</value>
         </uniform>
         <uniform>
             <name>u_EnableNormalMapping</name>
-            <value>0</value>
+            <value>1</value>
         </uniform>
         <uniform>
-            <name>u_HeightMap</name>
-            <value>?</value>
+            <name>u_Metallic</name>
+            <value>1.24</value>
         </uniform>
         <uniform>
-            <name>u_HeightScale</name>
-            <value>0</value>
-        </uniform>
-        <uniform>
-            <name>u_MaskMap</name>
-            <value>?</value>
+            <name>u_MetallicMap</name>
+            <value>:pbr\plastic\metallic.png</value>
         </uniform>
         <uniform>
             <name>u_NormalMap</name>
-            <value>?</value>
+            <value>:pbr\plastic\normal.png</value>
         </uniform>
         <uniform>
-            <name>u_Shininess</name>
-            <value>100</value>
+            <name>u_Roughness</name>
+            <value>0.43000001</value>
         </uniform>
         <uniform>
-            <name>u_Specular</name>
-            <value>
-                <x>1</x>
-                <y>1</y>
-                <z>1</z>
-            </value>
-        </uniform>
-        <uniform>
-            <name>u_SpecularMap</name>
-            <value>?</value>
+            <name>u_RoughnessMap</name>
+            <value>:pbr\plastic\roughness.png</value>
         </uniform>
         <uniform>
             <name>u_TextureOffset</name>

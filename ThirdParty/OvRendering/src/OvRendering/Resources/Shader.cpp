@@ -36,6 +36,11 @@ void OvRendering::Resources::Shader::SetUniformInt(const std::string& p_name, in
 	glUniform1i(GetUniformLocation(p_name), p_value);
 }
 
+void OvRendering::Resources::Shader::SetUniformUint(const std::string& p_name, unsigned int p_value)
+{
+    glUniform1ui(GetUniformLocation(p_name), p_value);
+}
+
 void OvRendering::Resources::Shader::SetUniformFloat(const std::string& p_name, float p_value)
 {
 	glUniform1f(GetUniformLocation(p_name), p_value);
@@ -65,7 +70,15 @@ int OvRendering::Resources::Shader::GetUniformInt(const std::string& p_name)
 {
 	int value;
 	glGetUniformiv(id, GetUniformLocation(p_name), &value);
+   
 	return value;
+}
+
+uint32_t OvRendering::Resources::Shader::GetUniformUInt(const std::string& p_name)
+{
+    unsigned int value;
+    glGetUniformuiv(id, GetUniformLocation(p_name),&value);
+    return value;
 }
 
 float OvRendering::Resources::Shader::GetUniformFloat(const std::string& p_name)
@@ -103,9 +116,13 @@ OvMaths::FMatrix4 OvRendering::Resources::Shader::GetUniformMat4(const std::stri
 	return reinterpret_cast<OvMaths::FMatrix4&>(values);
 }
 
-bool OvRendering::Resources::Shader::IsEngineUBOMember(const std::string & p_uniformName)
+bool OvRendering::Resources::Shader::IsEngineMember(const std::string & p_uniformName)
 {
-	return p_uniformName.rfind("ubo_", 0) == 0;
+    return p_uniformName.rfind("ubo_", 0) == 0
+        || p_uniformName == "irradiance_map"
+        || p_uniformName == "prefilter_map"
+        || p_uniformName == "BRDF_LUT";
+
 }
 
 uint32_t OvRendering::Resources::Shader::GetUniformLocation(const std::string& name)
@@ -129,6 +146,7 @@ void OvRendering::Resources::Shader::QueryUniforms()
 	uniforms.clear();
 	glGetProgramiv(id, GL_ACTIVE_UNIFORMS, &numActiveUniforms);
 	std::vector<GLchar> nameData(256);
+
 	for (int unif = 0; unif < numActiveUniforms; ++unif)
 	{
 		GLint arraySize = 0;
@@ -137,20 +155,22 @@ void OvRendering::Resources::Shader::QueryUniforms()
 		glGetActiveUniform(id, unif, static_cast<GLsizei>(nameData.size()), &actualLength, &arraySize, &type, &nameData[0]);
 		std::string name(static_cast<char*>(nameData.data()), actualLength);
 
-		if (!IsEngineUBOMember(name))
+		if (!IsEngineMember(name))
 		{
 			std::any defaultValue;
 
 			switch (static_cast<UniformType>(type))
 			{
 			case OvRendering::Resources::UniformType::UNIFORM_BOOL:			defaultValue = std::make_any<bool>(GetUniformInt(name));					break;
-			case OvRendering::Resources::UniformType::UNIFORM_INT:			defaultValue = std::make_any<int>(GetUniformInt(name));						break;
+			case OvRendering::Resources::UniformType::UNIFORM_INT:			defaultValue = std::make_any<int>(GetUniformInt(name));	                    break;
+            case OvRendering::Resources::UniformType::UNIFORM_UINT:			defaultValue = std::make_any<unsigned int>(GetUniformUInt(name));           break;
 			case OvRendering::Resources::UniformType::UNIFORM_FLOAT:		defaultValue = std::make_any<float>(GetUniformFloat(name));					break;
 			case OvRendering::Resources::UniformType::UNIFORM_FLOAT_VEC2:	defaultValue = std::make_any<OvMaths::FVector2>(GetUniformVec2(name));		break;
 			case OvRendering::Resources::UniformType::UNIFORM_FLOAT_VEC3:	defaultValue = std::make_any<OvMaths::FVector3>(GetUniformVec3(name));		break;
 			case OvRendering::Resources::UniformType::UNIFORM_FLOAT_VEC4:	defaultValue = std::make_any<OvMaths::FVector4>(GetUniformVec4(name));		break;
 			case OvRendering::Resources::UniformType::UNIFORM_SAMPLER_2D:	defaultValue = std::make_any<OvRendering::Resources::Texture*>(nullptr);	break;
-			}
+            case OvRendering::Resources::UniformType::UNIFORM_FLOAT_MAT4:	defaultValue = std::make_any<OvMaths::FMatrix4>(GetUniformMat4(name));	    break;
+            }
 
 			if (defaultValue.has_value())
 			{

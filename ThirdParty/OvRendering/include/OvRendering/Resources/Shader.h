@@ -46,6 +46,8 @@ namespace OvRendering::Resources
 		*/
 		void SetUniformInt(const std::string& p_name, int p_value);
 
+        void SetUniformUint(const std::string& p_name, unsigned int p_value);
+
 		/**
 		* Send a float to the GPU via a shader uniform
 		* @param p_name
@@ -86,6 +88,8 @@ namespace OvRendering::Resources
 		* @param p_name
 		*/
 		int GetUniformInt(const std::string& p_name);
+
+        uint32_t GetUniformUInt(const std::string& p_name);
 
 		/**
 		* Returns the float uniform value identified by the given name
@@ -132,7 +136,7 @@ namespace OvRendering::Resources
 		Shader(const std::string p_path, uint32_t p_id);
 		~Shader();
 
-		static bool IsEngineUBOMember(const std::string& p_uniformName);
+		static bool IsEngineMember(const std::string& p_uniformName);
 		uint32_t GetUniformLocation(const std::string& name);
 
 	public:

@@ -1,5 +1,6 @@
 #shader vertex
 #version 430 core
+#pragma optimize(off)
 
 layout (location = 0) in vec3 geo_Pos;
 layout (location = 1) in vec2 geo_TexCoords;
@@ -27,7 +28,6 @@ out VS_OUT
     flat vec3   TangentViewPos;
     vec3        TangentFragPos;
 } vs_out;
-
 void main()
 {
     vs_out.TBN = mat3

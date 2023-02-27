@@ -17,6 +17,8 @@ namespace OvRendering::Resources
 	{
 		UNIFORM_BOOL			= 0x8B56,
 		UNIFORM_INT				= 0x1404,
+        UNIFORM_UINT            = 0x1405,
+        UNIFORM_UINT_VEC2       = 0x1405,
 		UNIFORM_FLOAT			= 0x1406,
 		UNIFORM_FLOAT_VEC2		= 0x8B50,
 		UNIFORM_FLOAT_VEC3		= 0x8B51,
