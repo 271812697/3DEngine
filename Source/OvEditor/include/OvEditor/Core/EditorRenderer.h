@@ -79,6 +79,9 @@ namespace OvEditor::Core
 		*/
 		void RenderLights();
 
+
+        void RenderBloom();
+
 		/**
 		* Render a gizmo at position
 		* @param p_position

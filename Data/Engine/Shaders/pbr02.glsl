@@ -1130,7 +1130,7 @@ void main() {
         }
         //POINT
         if(ssbo_Lights[i][3][0]==0.0){
-        vec3 pc = EvaluateAPL(px, ssbo_Lights[i][0].rgb, 100.0f,ssbo_Lights[i][1][3], ssbo_Lights[i][2][3], 1.0);
+        vec3 pc = EvaluateAPL(px, ssbo_Lights[i][0].rgb, ssbo_Lights[i][2][1],ssbo_Lights[i][1][3], ssbo_Lights[i][2][3], 1.0);
         Lo += pc * UnPack(ssbo_Lights[i][2][0]) * ssbo_Lights[i][3][3];
 
 
@@ -1139,7 +1139,7 @@ void main() {
         if(ssbo_Lights[i][3][0]==2.0){
 
         vec3 sc = EvaluateASL(px,ssbo_Lights[i][0].rgb,-normalize(ssbo_Lights[i][1].rgb),
-        10.0f, cos(radians(ssbo_Lights[i][3][1])),
+        ssbo_Lights[i][2][1], cos(radians(ssbo_Lights[i][3][1])),
         cos(radians(ssbo_Lights[i][3][1] + ssbo_Lights[i][3][2])));
         Lo += 3.5*sc * UnPack(ssbo_Lights[i][2][0]) * ssbo_Lights[i][3][3];
         }

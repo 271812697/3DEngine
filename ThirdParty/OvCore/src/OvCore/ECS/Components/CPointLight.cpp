@@ -30,6 +30,11 @@ float OvCore::ECS::Components::CPointLight::GetConstant() const
 	return m_data.constant;
 }
 
+float OvCore::ECS::Components::CPointLight::GetRange() const
+{
+    return m_data.range;
+}
+
 float OvCore::ECS::Components::CPointLight::GetLinear() const
 {
 	return m_data.linear;
@@ -43,6 +48,11 @@ float OvCore::ECS::Components::CPointLight::GetQuadratic() const
 void OvCore::ECS::Components::CPointLight::SetConstant(float p_constant)
 {
 	m_data.constant = p_constant;
+}
+
+void OvCore::ECS::Components::CPointLight::SetRange(float p_range)
+{
+    m_data.range = p_range;
 }
 
 void OvCore::ECS::Components::CPointLight::SetLinear(float p_linear)
@@ -64,6 +74,7 @@ void OvCore::ECS::Components::CPointLight::OnSerialize(tinyxml2::XMLDocument & p
 	Serializer::SerializeFloat(p_doc, p_node, "constant", m_data.constant);
 	Serializer::SerializeFloat(p_doc, p_node, "linear", m_data.linear);
 	Serializer::SerializeFloat(p_doc, p_node, "quadratic", m_data.quadratic);
+    Serializer::SerializeFloat(p_doc, p_node, "range", m_data.range);
 }
 
 void OvCore::ECS::Components::CPointLight::OnDeserialize(tinyxml2::XMLDocument & p_doc, tinyxml2::XMLNode * p_node)
@@ -75,6 +86,7 @@ void OvCore::ECS::Components::CPointLight::OnDeserialize(tinyxml2::XMLDocument &
 	Serializer::DeserializeFloat(p_doc, p_node, "constant", m_data.constant);
 	Serializer::DeserializeFloat(p_doc, p_node, "linear", m_data.linear);
 	Serializer::DeserializeFloat(p_doc, p_node, "quadratic", m_data.quadratic);
+    Serializer::DeserializeFloat(p_doc, p_node, "range", m_data.range);
 }
 
 void OvCore::ECS::Components::CPointLight::OnInspector(OvUI::Internal::WidgetContainer& p_root)
@@ -103,4 +115,5 @@ void OvCore::ECS::Components::CPointLight::OnInspector(OvUI::Internal::WidgetCon
 	GUIDrawer::DrawScalar<float>(p_root, "Constant", m_data.constant, 0.005f, 0.f);
 	GUIDrawer::DrawScalar<float>(p_root, "Linear", m_data.linear, 0.005f, 0.f);
 	GUIDrawer::DrawScalar<float>(p_root, "Quadratic", m_data.quadratic, 0.005f, 0.f);
+    GUIDrawer::DrawScalar<float>(p_root, "range", m_data.range, 0.1f, 1.0f);
 }

@@ -48,6 +48,7 @@ namespace OvCore::ECS::Components
 		* Returns the light cutoff
 		*/
 		float GetCutoff() const;
+        float GetRange()const;
 
 		/**
 		* Returns the light outercutoff
@@ -59,6 +60,8 @@ namespace OvCore::ECS::Components
 		* @param p_constant
 		*/
 		void SetConstant(float p_constant);
+        void SetRange(float p_range);
+
 
 		/**
 		* Defines the light linear

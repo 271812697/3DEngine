@@ -35,6 +35,7 @@ namespace OvCore::ECS::Components
 		* Returns the light constant
 		*/
 		float GetConstant() const;
+        float GetRange() const;
 
 		/**
 		* Returns the light linear
@@ -51,6 +52,8 @@ namespace OvCore::ECS::Components
 		* @param p_constant
 		*/
 		void SetConstant(float p_constant);
+
+        void SetRange(float p_range);
 
 		/**
 		* Defines the light linear

@@ -45,6 +45,11 @@ float OvCore::ECS::Components::CSpotLight::GetCutoff() const
 	return m_data.cutoff;
 }
 
+float OvCore::ECS::Components::CSpotLight::GetRange() const
+{
+    return m_data.range;
+}
+
 float OvCore::ECS::Components::CSpotLight::GetOuterCutoff() const
 {
 	return m_data.outerCutoff;
@@ -53,6 +58,11 @@ float OvCore::ECS::Components::CSpotLight::GetOuterCutoff() const
 void OvCore::ECS::Components::CSpotLight::SetConstant(float p_constant)
 {
 	m_data.constant = p_constant;
+}
+
+void OvCore::ECS::Components::CSpotLight::SetRange(float p_range)
+{
+    m_data.range = p_range;
 }
 
 void OvCore::ECS::Components::CSpotLight::SetLinear(float p_linear)
@@ -86,6 +96,7 @@ void OvCore::ECS::Components::CSpotLight::OnSerialize(tinyxml2::XMLDocument & p_
 	Serializer::SerializeFloat(p_doc, p_node, "quadratic", m_data.quadratic);
 	Serializer::SerializeFloat(p_doc, p_node, "cutoff", m_data.cutoff);
 	Serializer::SerializeFloat(p_doc, p_node, "outercutoff", m_data.outerCutoff);
+    Serializer::SerializeFloat(p_doc, p_node, "range", m_data.range);
 }
 
 void OvCore::ECS::Components::CSpotLight::OnDeserialize(tinyxml2::XMLDocument & p_doc, tinyxml2::XMLNode * p_node)
@@ -99,6 +110,7 @@ void OvCore::ECS::Components::CSpotLight::OnDeserialize(tinyxml2::XMLDocument & 
 	Serializer::DeserializeFloat(p_doc, p_node, "quadratic", m_data.quadratic);
 	Serializer::DeserializeFloat(p_doc, p_node, "cutoff", m_data.cutoff);
 	Serializer::DeserializeFloat(p_doc, p_node, "outercutoff", m_data.outerCutoff);
+    Serializer::DeserializeFloat(p_doc, p_node, "range", m_data.range);
 }
 
 void OvCore::ECS::Components::CSpotLight::OnInspector(OvUI::Internal::WidgetContainer& p_root)
@@ -130,4 +142,5 @@ void OvCore::ECS::Components::CSpotLight::OnInspector(OvUI::Internal::WidgetCont
 	GUIDrawer::DrawScalar<float>(p_root, "Constant", m_data.constant, 0.005f, 0.f);
 	GUIDrawer::DrawScalar<float>(p_root, "Linear", m_data.linear, 0.005f, 0.f);
 	GUIDrawer::DrawScalar<float>(p_root, "Quadratic", m_data.quadratic, 0.005f, 0.f);
+    GUIDrawer::DrawScalar<float>(p_root, "range", m_data.range, 0.1f, 1.0f);
 }

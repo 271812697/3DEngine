@@ -304,9 +304,42 @@ void OvEditor::Core::EditorRenderer::RenderLights()
 			const auto& lightColor = light->GetColor();
 			m_lightMaterial.Set<OvRendering::Resources::Texture*>("u_DiffuseMap", texture);
 			m_lightMaterial.Set<OvMaths::FVector4>("u_Diffuse", OvMaths::FVector4(lightColor.x, lightColor.y, lightColor.z, 0.75f));
+            m_lightMaterial.Set<float>("light_intensity",light->GetIntensity());
 			m_context.renderer->DrawModelWithSingleMaterial(model, m_lightMaterial, &modelMatrix);
 		}
 	}
+}
+
+void OvEditor::Core::EditorRenderer::RenderBloom()
+{
+    for (auto light : m_context.sceneManager.GetCurrentScene()->GetFastAccessComponents().lights)
+    {
+        auto& actor = light->owner;
+
+        if (actor.IsActive())
+        {
+            auto& model = *m_context.editorResources->GetModel("Vertical_Plane");
+            auto modelMatrix = FMatrix4::Translation(actor.transform.GetWorldPosition());
+
+            OvRendering::Resources::Texture* texture = nullptr;
+
+            switch (static_cast<OvRendering::Entities::Light::Type>(static_cast<int>(light->GetData().type)))
+            {
+            case OvRendering::Entities::Light::Type::POINT:				texture = m_context.editorResources->GetTexture("Bill_Point_Light");			break;
+            case OvRendering::Entities::Light::Type::SPOT:				texture = m_context.editorResources->GetTexture("Bill_Spot_Light");				break;
+            case OvRendering::Entities::Light::Type::DIRECTIONAL:		texture = m_context.editorResources->GetTexture("Bill_Directional_Light");		break;
+            case OvRendering::Entities::Light::Type::AMBIENT_BOX:		texture = m_context.editorResources->GetTexture("Bill_Ambient_Box_Light");		break;
+            case OvRendering::Entities::Light::Type::AMBIENT_SPHERE:	texture = m_context.editorResources->GetTexture("Bill_Ambient_Sphere_Light");	break;
+            }
+
+            const auto& lightColor = light->GetColor();
+            m_lightMaterial.Set<OvRendering::Resources::Texture*>("u_DiffuseMap", texture);
+            m_lightMaterial.Set<OvMaths::FVector4>("u_Diffuse", OvMaths::FVector4(lightColor.x, lightColor.y, lightColor.z, 0.75f));
+            m_context.renderer->DrawModelWithSingleMaterial(model, m_lightMaterial, &modelMatrix);
+        }
+    }
+
+
 }
 
 void OvEditor::Core::EditorRenderer::RenderGizmo(const OvMaths::FVector3& p_position, const OvMaths::FQuaternion& p_rotation, OvEditor::Core::EGizmoOperation p_operation, bool p_pickable, int p_highlightedAxis)
@@ -819,7 +852,6 @@ void OvEditor::Core::EditorRenderer::RenderGrid(const OvMaths::FVector3& p_viewP
 
     FMatrix4 model = FMatrix4::Translation({ p_viewPos.x, 0.0f, p_viewPos.z }) * FMatrix4::Scaling({ gridSize * 2.0f, 1.f, gridSize * 2.0f });
 	m_gridMaterial.Set("u_Color", p_color);
-	//m_context.renderer->DrawModelWithSingleMaterial(*m_context.editorResources->GetModel("Plane"), m_gridMaterial, &model);
     m_context.shapeDrawer->DrawGrid(p_viewPos,p_color);
     m_context.shapeDrawer->DrawLine(OvMaths::FVector3(-gridSize + p_viewPos.x, 0.0f, 0.0f), OvMaths::FVector3(gridSize + p_viewPos.x, 0.0f, 0.0f), OvMaths::FVector3(1.0f, 0.0f, 0.0f), 1.0f);
     m_context.shapeDrawer->DrawLine(OvMaths::FVector3(0.0f, -gridSize + p_viewPos.y, 0.0f), OvMaths::FVector3(0.0f, gridSize + p_viewPos.y, 0.0f), OvMaths::FVector3(0.0f, 1.0f, 0.0f), 1.0f);

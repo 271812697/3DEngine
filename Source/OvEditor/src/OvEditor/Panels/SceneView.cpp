@@ -11,11 +11,13 @@
 #include "OvEditor/Panels/SceneView.h"
 #include "OvEditor/Panels/GameView.h"
 #include "OvEditor/Settings/EditorSettings.h"
-
+#include "Opengl//asset/fbo.h"
 #include "OvRendering/Resources/Texture2D.h"
 
 std::shared_ptr<asset::Shader>skys;
 std::shared_ptr<OvRendering::Resources::Texture2D>env_map;
+std::unique_ptr<asset::FBO> m_mulfbo;
+std::unique_ptr<asset::FBO> m_bloomfbo;
 OvEditor::Panels::SceneView::SceneView
 (
     const std::string& p_title,
@@ -25,8 +27,8 @@ OvEditor::Panels::SceneView::SceneView
 m_sceneManager(EDITOR_CONTEXT(sceneManager))
 
 {
-    m_mulfbo = std::make_unique<OvRendering::Buffers::Framebuffer>(1, 1);
-    m_mulfbo->AddColorTexture(1, true);
+    m_mulfbo = std::make_unique<asset::FBO>(1, 1);
+    m_mulfbo->AddColorTexture(2, true);
     m_mulfbo->AddDepStRenderBuffer(true);
     
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
@@ -194,9 +196,9 @@ void OvEditor::Panels::SceneView::RenderScene(uint8_t p_defaultRenderState)
 
     m_mulfbo->Unbind();
     //m_fbo.Unbind();
-    glNamedFramebufferReadBuffer(m_mulfbo->GetID(), GL_COLOR_ATTACHMENT0);
+    glNamedFramebufferReadBuffer(m_mulfbo->ID(), GL_COLOR_ATTACHMENT0);
     glNamedFramebufferDrawBuffer(m_fbo->GetID(), GL_COLOR_ATTACHMENT0);
-    glBlitNamedFramebuffer(m_mulfbo->GetID(), m_fbo->GetID(), 0, 0, winWidth, winHeight, 0, 0, winWidth, winHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBlitNamedFramebuffer(m_mulfbo->ID(), m_fbo->GetID(), 0, 0, winWidth, winHeight, 0, 0, winWidth, winHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
     //m_fbo.Unbind();
 }
 

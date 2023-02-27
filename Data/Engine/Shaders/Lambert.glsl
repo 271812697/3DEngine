@@ -33,7 +33,8 @@ void main()
 #shader fragment
 #version 430 core
 
-out vec4 FRAGMENT_COLOR;
+layout(location = 0) out vec4 FRAGMENT_COLOR;
+layout(location = 1) out vec4 bloom;
 
 in VS_OUT
 {

@@ -292,8 +292,18 @@ void main()
 
 	source.second = R"(
 #version 430 core
-
-out vec4 FRAGMENT_COLOR;
+layout (std140) uniform EngineUBO
+{
+    mat4    ubo_Model;
+    mat4    ubo_View;
+    mat4    ubo_Projection;
+    vec3    ubo_ViewPos;
+    float   ubo_Time;
+};
+layout(location = 0) out vec4 FRAGMENT_COLOR;
+layout(location = 1) out vec4 bloom;
+uniform float light_intensity;
+uniform float bloom_factor=1.5;
 
 in VS_OUT
 {
@@ -307,7 +317,13 @@ uniform vec2        u_TextureOffset = vec2(0.0, 0.0);
 
 void main()
 {
+    float fade_io = 0.3 + abs(cos(ubo_Time));
+    float intensity = light_intensity * fade_io;
+
+    bloom =  vec4(u_Diffuse.rgb * intensity * bloom_factor, 1.0) ;
+    //if(bloom.r>0||bloom.g>0||bloom.b>0)
     FRAGMENT_COLOR = texture(u_DiffuseMap, u_TextureOffset + vec2(mod(fs_in.TexCoords.x * u_TextureTiling.x, 1), mod(fs_in.TexCoords.y * u_TextureTiling.y, 1))) * u_Diffuse;
+    //else FRAGMENT_COLOR=vec4(0.0,0.0,0.0,1.0);
 })";
 
 	return source;
