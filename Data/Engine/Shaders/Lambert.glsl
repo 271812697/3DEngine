@@ -62,4 +62,6 @@ void main()
 {
     const vec4 diffuse = texture(u_DiffuseMap, u_TextureOffset + vec2(mod(fs_in.TexCoords.x * u_TextureTiling.x, 1), mod(fs_in.TexCoords.y * u_TextureTiling.y, 1))) * u_Diffuse;
     FRAGMENT_COLOR = vec4(Lambert(fs_in.FragPos, fs_in.Normal) * diffuse.rgb, diffuse.a);
+    bloom = vec4(0.0);
+    
 }

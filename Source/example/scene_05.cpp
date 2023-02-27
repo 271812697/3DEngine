@@ -375,7 +375,7 @@ namespace scene {
 
         for (int i = 0; i < 6; ++i) {
             bloom_shader->SetUniform(0, i % 2 == 0);
-            bloom_shader->Dispatch(ping.width / 32, ping.width / 18);
+            bloom_shader->Dispatch(ping.width / 32, ping.height / 18);
             bloom_shader->SyncWait(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
         }
 

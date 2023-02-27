@@ -28,9 +28,10 @@ void main() {
 
 
 #ifdef fragment_shader
-
-layout(location = 0) in vec3 _tex_coords;
 layout(location = 0) out vec4 color;
+layout(location = 1) out vec4 bloom;
+layout(location = 0) in vec3 _tex_coords;
+
 
 
 layout(binding = 1) uniform samplerCube skybox;
@@ -57,6 +58,7 @@ void main() {
     const float max_level = textureQueryLevels(skybox) - 1.0;
     vec3 irradiance = textureLod(skybox, _tex_coords, clamp(lod, 0.0, max_level)).rgb;
     color = vec4(Linear2Gamma(ApproxACES(irradiance * exposure)), 1.0);
+    bloom=vec4(0.0);
 }
 
 #endif

@@ -28,8 +28,8 @@ void main()
 
 #shader fragment
 #version 430 core
-
-out vec4 FRAGMENT_COLOR;
+layout(location = 0) out vec4 FRAGMENT_COLOR;
+layout(location = 1) out vec4 bloom;
 
 in VS_OUT
 {
@@ -45,4 +45,6 @@ void main()
 {
     //FRAGMENT_COLOR = texture(u_DiffuseMap, u_TextureOffset + vec2(mod(fs_in.TexCoords.x * u_TextureTiling.x, 1), mod(fs_in.TexCoords.y * u_TextureTiling.y, 1))) * u_Diffuse;
     FRAGMENT_COLOR=u_Diffuse;
+        bloom = vec4(0.0);
+    
 }

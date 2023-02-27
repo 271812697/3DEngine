@@ -78,7 +78,8 @@ layout(std430, binding = 0) buffer LightSSBO
     mat4 ssbo_Lights[];
 };
 
-out vec4 FRAGMENT_COLOR;
+layout(location = 0) out vec4 FRAGMENT_COLOR;
+layout(location = 1) out vec4 bloom;
 
 uniform sampler2D   u_AlbedoMap;
 uniform sampler2D   u_MetallicMap;
@@ -291,4 +292,6 @@ void main()
     color = pow(color, vec3(1.0/2.2));  
    
     FRAGMENT_COLOR = vec4(color, albedoRGBA.a);
+        bloom = vec4(0.0);
+    
 }

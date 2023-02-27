@@ -57,10 +57,12 @@ namespace OvRendering::Buffers
 		void AddDepStTexture(bool multisample = false);
 		void AddDepStRenderBuffer(bool multisample = false);
 		void AddDepthCubemap();
+        void SetDrawBuffers() const;
+        static void CopyColor(const Framebuffer& fr, GLuint fr_idx, const Framebuffer& to, GLuint to_idx);
 		/**
 		* Returns the ID of the OpenGL framebuffer
 		*/
-		uint32_t GetID();
+		uint32_t GetID()const;
 
 		/**
 		* Returns the ID of the OpenGL render texture

@@ -70,6 +70,7 @@ layout(location = 0) in _vtx {
 };
 
 layout(location = 0) out vec4 color;
+layout(location = 1) out vec4 bloom;
 layout(location = 0) uniform float ibl_exposure;
 
 // sampler binding points (texture units) 17-19 are reserved for PBR IBL
@@ -1145,6 +1146,7 @@ void main() {
         }
 
     }
+    bloom = vec4(0.0,0.0,0.0,0.0);
     
     //vec3 sc = EvaluateASL(px, sl.position.xyz, sl.direction.xyz, sl.range, sl.inner_cos, sl.outer_cos);
     //Lo += sc * sl.color.rgb * sl.intensity;

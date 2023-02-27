@@ -101,7 +101,8 @@ vec4 g_SpecularTexel;
 vec4 g_HeightTexel;
 vec4 g_NormalTexel;
 
-out vec4 FRAGMENT_COLOR;
+layout(location = 0) out vec4 FRAGMENT_COLOR;
+layout(location = 1) out vec4 bloom;
 
 vec3 UnPack(float p_Target)
 {
@@ -255,4 +256,6 @@ void main()
     {
         FRAGMENT_COLOR = vec4(0.0);
     }
+        bloom = vec4(0.0);
+    
 }

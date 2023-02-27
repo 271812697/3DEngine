@@ -11,13 +11,70 @@
 #include "OvEditor/Panels/SceneView.h"
 #include "OvEditor/Panels/GameView.h"
 #include "OvEditor/Settings/EditorSettings.h"
-#include "Opengl//asset/fbo.h"
+#include "Opengl//asset/shader.h"
 #include "OvRendering/Resources/Texture2D.h"
 
 std::shared_ptr<asset::Shader>skys;
 std::shared_ptr<OvRendering::Resources::Texture2D>env_map;
-std::unique_ptr<asset::FBO> m_mulfbo;
-std::unique_ptr<asset::FBO> m_bloomfbo;
+std::shared_ptr<asset::CShader>bloom_shader;
+
+static std::string code = R"(
+#version 460 core
+// precomputed 11x11 Gaussian blur filter (sigma = 4)
+const float weight[6] = float[] (
+    0.1198770,  // offset 0
+    0.1161890,  // offset +1 -1
+    0.1057910,  // offset +2 -2
+    0.0904881,  // offset +3 -3
+    0.0727092,  // offset +4 -4
+    0.0548838   // offset +5 -5
+);
+
+
+
+
+layout(local_size_x = 32, local_size_y = 18, local_size_z = 1) in;  // fit 16:9 aspect ratio
+
+layout(binding = 0, rgba16f) uniform image2D ping;
+layout(binding = 1, rgba16f) uniform image2D pong;
+
+layout(location = 0) uniform bool horizontal;
+
+void GaussianBlurH(const ivec2 coord) {
+    vec3 color = imageLoad(ping, coord).rgb * weight[0];
+    for (int i = 1; i < 6; i++) {
+        ivec2 offset = ivec2(i, 0);
+        color += imageLoad(ping, coord + offset).rgb * weight[i];
+        color += imageLoad(ping, coord - offset).rgb * weight[i];
+    }
+    imageStore(pong, coord, vec4(color, 1.0));
+}
+
+void GaussianBlurV(const ivec2 coord) {
+    vec3 color = imageLoad(pong, coord).rgb * weight[0];
+    for (int i = 1; i < 6; i++) {
+        ivec2 offset = ivec2(0, i);
+        color += imageLoad(pong, coord + offset).rgb * weight[i];
+        color += imageLoad(pong, coord - offset).rgb * weight[i];
+    }
+    imageStore(ping, coord, vec4(color, 1.0));
+}
+
+void main() {
+    ivec2 ils_coord = ivec2(gl_GlobalInvocationID.xy);
+
+    if (horizontal) {
+        GaussianBlurH(ils_coord);  // horizontal
+    }
+    else {
+        GaussianBlurV(ils_coord);  // vertical
+    }
+}
+
+
+
+
+)";
 OvEditor::Panels::SceneView::SceneView
 (
     const std::string& p_title,
@@ -27,9 +84,15 @@ OvEditor::Panels::SceneView::SceneView
 m_sceneManager(EDITOR_CONTEXT(sceneManager))
 
 {
-    m_mulfbo = std::make_unique<asset::FBO>(1, 1);
+    m_mulfbo = std::make_unique<OvRendering::Buffers::Framebuffer>(1, 1);
     m_mulfbo->AddColorTexture(2, true);
     m_mulfbo->AddDepStRenderBuffer(true);
+
+    m_resfbo = std::make_unique<OvRendering::Buffers::Framebuffer>(1, 1);
+    m_resfbo->AddColorTexture(2);
+
+    m_bloomfbo=std::make_unique<OvRendering::Buffers::Framebuffer>(1, 1);
+    m_bloomfbo->AddColorTexture(2);
     
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     std::tie(irradiance_map, prefiltered_map, BRDF_LUT)=
@@ -64,6 +127,26 @@ m_sceneManager(EDITOR_CONTEXT(sceneManager))
         case OvTools::Utils::PathParser::EFileType::MODEL:	EDITOR_EXEC(CreateActorWithModel(path, true));	break;
         }
     };
+    /*
+        const char* c_source_code = code.c_str();
+    GLuint shader_id = glCreateShader(GL_COMPUTE_SHADER);
+    glShaderSource(shader_id, 1, &c_source_code, nullptr);
+    glCompileShader(shader_id);
+
+
+     pid = glCreateProgram();
+    glAttachShader(pid, shader_id);
+    glLinkProgram(pid);
+   
+
+    glDetachShader(pid, shader_id);
+    glDeleteShader(shader_id);
+    */
+    bloom_shader=std::make_shared<asset::CShader>( "Resource\\Shader\\bloom.glsl");
+   
+
+  
+
 }
 
 void OvEditor::Panels::SceneView::Update(float p_deltaTime)
@@ -108,7 +191,8 @@ void OvEditor::Panels::SceneView::_Render_Impl()
 
 void OvEditor::Panels::SceneView::RenderScene(uint8_t p_defaultRenderState)
 {
-    auto& baseRenderer = *EDITOR_CONTEXT(renderer).get();
+    
+        auto& baseRenderer = *EDITOR_CONTEXT(renderer).get();
     auto& currentScene = *m_sceneManager.GetCurrentScene();
     auto& gameView = EDITOR_PANEL(OvEditor::Panels::GameView, "Game View");
 
@@ -124,6 +208,8 @@ void OvEditor::Panels::SceneView::RenderScene(uint8_t p_defaultRenderState)
 
     auto [winWidth, winHeight] = GetSafeSize();
 
+    m_resfbo->Resize(winWidth, winHeight);
+    m_bloomfbo->Resize(winWidth/2, winHeight/2);
     m_mulfbo->Resize(winWidth, winHeight);
     //m_fbo.Bind();
     m_mulfbo->Bind();
@@ -195,11 +281,75 @@ void OvEditor::Panels::SceneView::RenderScene(uint8_t p_defaultRenderState)
 
 
     m_mulfbo->Unbind();
-    //m_fbo.Unbind();
-    glNamedFramebufferReadBuffer(m_mulfbo->ID(), GL_COLOR_ATTACHMENT0);
-    glNamedFramebufferDrawBuffer(m_fbo->GetID(), GL_COLOR_ATTACHMENT0);
-    glBlitNamedFramebuffer(m_mulfbo->ID(), m_fbo->GetID(), 0, 0, winWidth, winHeight, 0, 0, winWidth, winHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-    //m_fbo.Unbind();
+    //MSAA pass
+    OvRendering::Buffers::Framebuffer::CopyColor(*m_mulfbo.get(), 0, *m_resfbo.get(), 0);
+    OvRendering::Buffers::Framebuffer::CopyColor(*m_mulfbo.get(), 1, *m_resfbo.get(), 1);
+    //bloom pass
+    OvRendering::Buffers::Framebuffer::CopyColor(*m_resfbo.get(), 1, *m_bloomfbo.get(), 0);
+
+    //postprocess pass
+
+
+    //m_fbo->Bind();
+
+
+    OvRendering::Buffers::Framebuffer::CopyColor(*m_resfbo.get(), 0, *m_fbo.get(), 0);
+    
+    
+    
+/*
+    auto& baseRenderer = *EDITOR_CONTEXT(renderer).get();
+    auto& currentScene = *m_sceneManager.GetCurrentScene();
+   
+  
+
+    auto [winWidth, winHeight] = GetSafeSize();
+
+    m_resfbo->Resize(winWidth, winHeight);
+    m_bloomfbo->Resize(winWidth/2, winHeight/2);
+    m_mulfbo->Resize(winWidth, winHeight);
+    //m_fbo.Bind();
+    m_mulfbo->Bind();
+    baseRenderer.SetStencilMask(0xFF);
+    baseRenderer.Clear(m_camera);
+    baseRenderer.SetStencilMask(0x00);
+    baseRenderer.SetCapability(OvRendering::Settings::ERenderingCapability::MULTISAMPLE, true);
+    
+
+    m_editorRenderer.RenderLights();
+
+   
+
+    m_mulfbo->Unbind();
+    //MSAA pass
+    OvRendering::Buffers::Framebuffer::CopyColor(*m_mulfbo.get(), 0, *m_resfbo.get(), 0);
+    OvRendering::Buffers::Framebuffer::CopyColor(*m_mulfbo.get(), 1, *m_resfbo.get(), 1);
+    //bloom pass
+    OvRendering::Buffers::Framebuffer::CopyColor(*m_resfbo.get(), 1, *m_bloomfbo.get(), 0);
+    auto ping = m_bloomfbo->GetTextureID(0);
+    auto pong = m_bloomfbo->GetTextureID(1);
+    bloom_shader->Bind();
+    glBindImageTexture(0, ping, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F);
+    glBindImageTexture(1, pong, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F);
+    for(int i = 0; i < 6; ++i) {
+        bloom_shader->SetUniform(0, i % 2 == 0);
+        bloom_shader->Dispatch(winWidth / 64, winHeight / 36);
+        bloom_shader->SyncWait(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
+    }
+
+    //postprocess pass
+
+
+    //m_fbo->Bind();
+
+
+    OvRendering::Buffers::Framebuffer::CopyColor(*m_bloomfbo.get(), 0, *m_fbo.get(), 0);
+    
+
+*/
+    
+
+
 }
 
 void OvEditor::Panels::SceneView::RenderSceneForActorPicking()

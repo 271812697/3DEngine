@@ -75,7 +75,7 @@ void OvRendering::Buffers::Framebuffer::AddColorTexture(uint16_t count, bool mul
 		GLenum target = multisample ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
 		uint32_t m_renderTexture=0;
 		glCreateTextures(GL_TEXTURE_2D, 1, &m_renderTexture);
-		glTextureStorage2D(m_renderTexture, 1, GL_RGB16F, width, height);
+		glTextureStorage2D(m_renderTexture, 1, GL_RGBA16F, width, height);
 		static const float border[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 		// we cannot set any of the sampler states for multisampled textures
 		if (!multisample) {
@@ -88,6 +88,7 @@ void OvRendering::Buffers::Framebuffer::AddColorTexture(uint16_t count, bool mul
 		glNamedFramebufferTexture(m_bufferID, GL_COLOR_ATTACHMENT0 + n_color_buffs + i, m_renderTexture, 0);
 		color_attachments.emplace_back(m_renderTexture);;
 	}
+    SetDrawBuffers();
 }
 void OvRendering::Buffers::Framebuffer::AddDepStRenderBuffer(bool multisample) {
 	if (m_depthStencilBuffer == 0) {
@@ -105,10 +106,34 @@ void OvRendering::Buffers::Framebuffer::AddDepStRenderBuffer(bool multisample) {
 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
 	}
 }
-uint32_t OvRendering::Buffers::Framebuffer::GetID()
+void OvRendering::Buffers::Framebuffer::SetDrawBuffers() const
 {
-	return m_bufferID;
+    if (size_t n = color_attachments.size(); n > 0) {
+        GLenum* attachments = new GLenum[n];
+        for (GLenum i = 0; i < n; i++) {
+            *(attachments + i) = GL_COLOR_ATTACHMENT0 + i;
+        }
+        glNamedFramebufferDrawBuffers(m_bufferID, n, attachments);
+        delete[] attachments;
+    }
 }
+void OvRendering::Buffers::Framebuffer::CopyColor(const Framebuffer& fr, GLuint fr_idx, const Framebuffer& to, GLuint to_idx)
+{
+
+    // if the source and target rectangle areas differ in size, interpolation will be applied
+    GLuint fw = fr.width, fh = fr.height;
+    GLuint tw = to.width, th = to.height;
+
+    glNamedFramebufferReadBuffer(fr.GetID(), GL_COLOR_ATTACHMENT0 + fr_idx);
+    glNamedFramebufferDrawBuffer(to.GetID(), GL_COLOR_ATTACHMENT0 + to_idx);
+    glBlitNamedFramebuffer(fr.GetID(), to.GetID(), 0, 0, fw, fh, 0, 0, tw, th, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+}
+uint32_t OvRendering::Buffers::Framebuffer::GetID() const
+{
+    return m_bufferID;
+}
+
 
 uint32_t OvRendering::Buffers::Framebuffer::GetTextureID(uint16_t index)
 {
