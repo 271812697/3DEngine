@@ -253,6 +253,8 @@ void OvEditor::Core::EditorRenderer::RenderSceneForActorPicking()
 
 void OvEditor::Core::EditorRenderer::RenderUI()
 {
+
+
 	m_context.uiManager->Render();
 }
 
@@ -378,6 +380,20 @@ void OvEditor::Core::EditorRenderer::RenderGizmo(const OvMaths::FVector3& p_posi
 	{
 		m_context.renderer->DrawModelWithSingleMaterial(*arrowModel, p_pickable ? m_gizmoPickingMaterial : m_gizmoArrowMaterial, &model);
 	}
+}
+
+void OvEditor::Core::EditorRenderer::RenderGizmo(const OvMaths::FVector3& p_position, const OvMaths::FQuaternion& p_rotation, OvEditor::Core::EGizmoOperation p_operation, const OvRendering::LowRenderer::Camera& p_camera)
+{
+    FMatrix4 model = FMatrix4::Translation(p_position) * FQuaternion::ToMatrix4(FQuaternion::Normalize(p_rotation));
+   // ImGuizmo::BeginFrame();
+    ImGuiIO& io = ImGui::GetIO();
+    ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+
+    ImGuizmo::SetOrthographic(false);
+    ImGuizmo::SetDrawlist();
+   // ImGuizmo::SetRect(0, 0, 500, 500);
+    ImGuizmo::Manipulate(OvMaths::FMatrix4::Transpose(p_camera.GetViewMatrix()).data, OvMaths::FMatrix4::Transpose(p_camera.GetProjectionMatrix()).data, ImGuizmo::TRANSLATE, ImGuizmo::WORLD, OvMaths::FMatrix4::Transpose(model).data);
+
 }
 
 void OvEditor::Core::EditorRenderer::RenderModelToStencil(const OvMaths::FMatrix4& p_worldMatrix, OvRendering::Resources::Model& p_model)

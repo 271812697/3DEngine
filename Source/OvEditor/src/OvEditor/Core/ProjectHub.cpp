@@ -263,7 +263,12 @@ std::tuple<bool, std::string, std::string> OvEditor::Core::ProjectHub::Run()
 	{
 		m_renderer->Clear();
 		m_device->PollEvents();
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
 		m_uiManager->Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        ImGui::Render();
 		m_window->SwapBuffers();
 
 		if (!m_mainPanel->IsOpened())

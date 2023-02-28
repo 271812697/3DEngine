@@ -137,6 +137,7 @@ layout (std140) uniform EngineUBO
 out VS_OUT
 {
     vec3 Color;
+    vec3 Normal;
 } vs_out;
 
 uniform bool u_IsBall;
@@ -224,6 +225,7 @@ out vec4 FRAGMENT_COLOR;
 in VS_OUT
 {
     vec3 Color;
+    vec3 Normal;
 } fs_in;
 
 uniform bool u_IsPickable;

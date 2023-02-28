@@ -27,7 +27,8 @@ namespace OvEditor::Panels
 			bool p_opened,
 			const OvUI::Settings::PanelWindowSettings& p_windowSettings
 		);
-
+        void  _Draw_ImplInWindow()  override;
+       // void _Draw_Impl() override;
 		/**
 		* Update the scene view
 		*/
@@ -60,12 +61,10 @@ namespace OvEditor::Panels
         std::unique_ptr<OvRendering::Buffers::Framebuffer> m_bloomfbo;
 		OvCore::SceneSystem::SceneManager& m_sceneManager;
 		std::unique_ptr<OvRendering::Buffers::Framebuffer> m_actorPickingFramebuffer;
-		OvEditor::Core::GizmoBehaviour m_gizmoOperations;
-		OvEditor::Core::EGizmoOperation m_currentOperation = OvEditor::Core::EGizmoOperation::TRANSLATE;
+        unsigned m_currentOperation = 7;
 		std::shared_ptr<asset::Texture>irradiance_map;
 		std::shared_ptr<asset::Texture>prefiltered_map;
 		std::shared_ptr<asset::Texture>BRDF_LUT;
 		std::optional<std::reference_wrapper<OvCore::ECS::Actor>> m_highlightedActor;
-		std::optional<OvEditor::Core::GizmoBehaviour::EDirection> m_highlightedGizmoDirection;
 	};
 }

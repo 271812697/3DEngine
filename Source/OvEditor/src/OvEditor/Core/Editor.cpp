@@ -80,14 +80,21 @@ void OvEditor::Core::Editor::PreUpdate()
 }
 
 void OvEditor::Core::Editor::Update(float p_deltaTime)
-{
+{   
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
 	HandleGlobalShortcuts();
 	UpdateCurrentEditorMode(p_deltaTime);
 	PrepareRendering(p_deltaTime);
 	UpdateEditorPanels(p_deltaTime);
-	RenderViews(p_deltaTime);
-	RenderEditorUI(p_deltaTime);
+	RenderViews(p_deltaTime);   
+	RenderEditorUI(p_deltaTime); 
 	m_editorActions.ExecuteDelayedActions();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    ImGui::Render();
+  
+
 }
 
 void OvEditor::Core::Editor::HandleGlobalShortcuts()
@@ -235,7 +242,9 @@ void OvEditor::Core::Editor::RenderViews(float p_deltaTime)
 
 void OvEditor::Core::Editor::RenderEditorUI(float p_deltaTime)
 {
+
 	PROFILER_SPY("Editor UI Rendering");
+
     m_editorRenderer.RenderUI();
 }
 

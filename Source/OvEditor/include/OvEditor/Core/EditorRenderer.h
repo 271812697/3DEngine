@@ -91,6 +91,7 @@ namespace OvEditor::Core
 		* @param p_highlightedAxis (-1 to highlight no axis, 0 for X, 1 for Y, 2 for Z)
 		*/
 		void RenderGizmo(const OvMaths::FVector3& p_position, const OvMaths::FQuaternion& p_rotation, OvEditor::Core::EGizmoOperation p_operation, bool p_pickable, int p_highlightedAxis = -1);
+        void RenderGizmo(const OvMaths::FVector3& p_position, const OvMaths::FQuaternion& p_rotation, OvEditor::Core::EGizmoOperation p_operation, const OvRendering::LowRenderer::Camera& p_camera);
 
 		/**
 		* Render a model to the stencil buffer

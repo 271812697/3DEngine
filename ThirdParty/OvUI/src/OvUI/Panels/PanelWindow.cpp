@@ -166,6 +166,7 @@ void OvUI::Panels::PanelWindow::_Draw_Impl()
             }
 
 			DrawWidgets();
+            _Draw_ImplInWindow();
 		}
         else {
             m_hovered = false;

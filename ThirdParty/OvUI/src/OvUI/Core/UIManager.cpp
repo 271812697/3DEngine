@@ -383,7 +383,6 @@ void OvUI::Core::UIManager::Render()
 	if (m_currentCanvas)
 	{
 		m_currentCanvas->Draw();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}
 }
 

@@ -91,6 +91,7 @@ namespace OvUI::Panels
         bool IsScrolledToTop() const;
 
 	protected:
+        void virtual _Draw_ImplInWindow(){};
 		void _Draw_Impl() override;
 
 	public:
@@ -116,7 +117,7 @@ namespace OvUI::Panels
 		OvTools::Eventing::Event<> OpenEvent;
 		OvTools::Eventing::Event<> CloseEvent;
 
-	private:
+	protected:
 		bool m_opened;
 		bool m_hovered;
 		bool m_focused;
