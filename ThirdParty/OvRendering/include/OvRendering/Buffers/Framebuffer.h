@@ -6,8 +6,9 @@
 
 #pragma once
 
+#include<memory>
 #include <vector>
-
+#include"OvRendering/Resources/Texture2D.h"
 #include "OvRendering/Context/Driver.h"
 
 namespace OvRendering::Buffers
@@ -33,7 +34,7 @@ namespace OvRendering::Buffers
 		* Bind the framebuffer
 		*/
 		void Bind();
-
+        void Clear() const;
 		/**
 		* Unbind the framebuffer
 		*/
@@ -63,11 +64,13 @@ namespace OvRendering::Buffers
 		* Returns the ID of the OpenGL framebuffer
 		*/
 		uint32_t GetID()const;
-
+        const OvRendering::Resources::Texture2D& GetDepthTexture() const;
+        void Clear(GLint index) const;
 		/**
 		* Returns the ID of the OpenGL render texture
 		*/
 		uint32_t GetTextureID(uint16_t index = 0);
+        const OvRendering::Resources::Texture2D& GetColorTexture(GLenum index) const;
 
 		/**
 		* Returns the ID of the OpenGL render buffer
@@ -76,8 +79,10 @@ namespace OvRendering::Buffers
 
 	private:
 		uint32_t width=0, height=0;
-		std::vector<uint32_t> color_attachments;
-		uint32_t m_deptexture = 0;
+        std::vector<OvRendering::Resources::Texture2D>color_attachments;
+        std::unique_ptr<OvRendering::Resources::Texture2D> m_deptexture;
+
+
 		uint32_t m_bufferID = 0;
 		uint32_t m_depthStencilBuffer = 0;
 		bool is_multisample = false;

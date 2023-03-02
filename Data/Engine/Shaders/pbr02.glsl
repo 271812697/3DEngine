@@ -77,6 +77,7 @@ layout(location = 0) uniform float ibl_exposure;
 layout(binding = 0) uniform samplerCube irradiance_map;
 layout(binding = 1) uniform samplerCube prefilter_map;
 layout(binding = 2) uniform sampler2D BRDF_LUT;
+layout(binding = 3) uniform samplerCube shadow_map1[7];
 
 // sampler binding points (texture units) >= 20 are reserved for PBR use
 layout(binding = 20) uniform sampler2D albedo_map;
@@ -1121,9 +1122,8 @@ void main() {
     //vec3 Lo=albedo.rgb;
     vec3 Le = vec3(0.0);  // emission
 
-    Lo += EvaluateIBL(px) * max(ibl_exposure, 0.5);
-    //Lo += texture(BRDF_LUT, px.uv).rgb;
-    //enum class Type { POINT, DIRECTIONAL, SPOT, AMBIENT_BOX, AMBIENT_SPHERE };
+    //Lo += EvaluateIBL(px) * min(max(ibl_exposure, 0.5),0.7);
+
     for(int i=0;i<ssbo_Lights.length();i++){
         //DIRECTIONAL
         if(ssbo_Lights[i][3][0]==1.0){
@@ -1131,10 +1131,10 @@ void main() {
         }
         //POINT
         if(ssbo_Lights[i][3][0]==0.0){
-        vec3 pc = EvaluateAPL(px, ssbo_Lights[i][0].rgb, ssbo_Lights[i][2][1],ssbo_Lights[i][1][3], ssbo_Lights[i][2][3], 1.0);
+        float visibility = 1.0;
+        visibility -= EvalOcclusion(px, shadow_map1[uint(ssbo_Lights[i][2][2])], ssbo_Lights[i][0].rgb, 0.001);
+        vec3 pc = EvaluateAPL(px, ssbo_Lights[i][0].rgb, ssbo_Lights[i][2][1],ssbo_Lights[i][1][3], ssbo_Lights[i][2][3], visibility);
         Lo += pc * UnPack(ssbo_Lights[i][2][0]) * ssbo_Lights[i][3][3];
-
-
         }
         //SPOT
         if(ssbo_Lights[i][3][0]==2.0){
@@ -1146,11 +1146,7 @@ void main() {
         }
 
     }
-    bloom = vec4(0.0,0.0,0.0,0.0);
-    
-    //vec3 sc = EvaluateASL(px, sl.position.xyz, sl.direction.xyz, sl.range, sl.inner_cos, sl.outer_cos);
-    //Lo += sc * sl.color.rgb * sl.intensity;
-    //color = vec4(Lo + Le, px.albedo.a);
-   
-    color = vec4(Linear2Gamma(ApproxACES(Lo + Le)), 1.0);
+    bloom = vec4(0.0,0.0,0.0,1.0);
+    color = vec4(Lo + Le, px.albedo.a);
+ 
 }

@@ -22,16 +22,20 @@ OvRendering::Buffers::Framebuffer::~Framebuffer()
 {
 	/* Destroy OpenGL objects */
 	glDeleteFramebuffers(1, &m_bufferID);
-	for (auto id : color_attachments) {
+
+    /*
+    	for (auto id : color_attachments) {
 		glDeleteTextures(1, &id);
 	}
+    */
+
 	if (m_depthStencilBuffer) {
 		glDeleteRenderbuffers(1, &m_depthStencilBuffer);
 		m_depthStencilBuffer = 0;
 	}
 	if (m_deptexture) {
-		glDeleteTextures(1, &m_deptexture);
-		m_deptexture = 0;
+        m_deptexture.release();
+		
 	}
 }
 
@@ -39,7 +43,15 @@ void OvRendering::Buffers::Framebuffer::Bind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_bufferID);
 }
+void OvRendering::Buffers::Framebuffer::Clear() const
+{
+    for (int i = 0; i < color_attachments.size(); i++) {
+        Clear(i);
+    }
 
+    Clear(-1);
+    Clear(-2);
+}
 void OvRendering::Buffers::Framebuffer::Unbind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -50,9 +62,6 @@ void OvRendering::Buffers::Framebuffer::Resize(uint16_t p_width, uint16_t p_heig
 	this->width = p_width;
 	this->height = p_height;
 	int cnt = color_attachments.size();
-	for (auto id : color_attachments) {
-		glDeleteTextures(1, &id);
-	}
 	color_attachments.clear();
 	AddColorTexture(cnt, is_multisample);
 	if (m_depthStencilBuffer) {
@@ -62,8 +71,7 @@ void OvRendering::Buffers::Framebuffer::Resize(uint16_t p_width, uint16_t p_heig
 	}
 
 	if (m_deptexture) {
-		glDeleteTextures(1, &m_deptexture);
-		m_deptexture = 0;
+        m_deptexture.release();
 		//AddDepStTexture();
 	}
 }
@@ -73,22 +81,50 @@ void OvRendering::Buffers::Framebuffer::AddColorTexture(uint16_t count, bool mul
 	color_attachments.reserve(n_color_buffs + count);
 	for (GLuint i = 0; i < count; i++) {
 		GLenum target = multisample ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
-		uint32_t m_renderTexture=0;
-		glCreateTextures(GL_TEXTURE_2D, 1, &m_renderTexture);
-		glTextureStorage2D(m_renderTexture, 1, GL_RGBA16F, width, height);
-		static const float border[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-		// we cannot set any of the sampler states for multisampled textures
-		if (!multisample) {
-			glTextureParameteri(m_renderTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTextureParameteri(m_renderTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTextureParameteri(m_renderTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-			glTextureParameteri(m_renderTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-			glTextureParameterfv(m_renderTexture, GL_TEXTURE_BORDER_COLOR, border);
-		}
-		glNamedFramebufferTexture(m_bufferID, GL_COLOR_ATTACHMENT0 + n_color_buffs + i, m_renderTexture, 0);
-		color_attachments.emplace_back(m_renderTexture);;
+        auto& texture = color_attachments.emplace_back(target, width, height, 1, GL_RGBA16F, 1);
+        GLuint tid = texture.id;
+
+        static const float border[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+
+        // we cannot set any of the sampler states for multisampled textures
+        if (!multisample) {
+            glTextureParameteri(tid, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTextureParameteri(tid, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTextureParameteri(tid, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+            glTextureParameteri(tid, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+            glTextureParameterfv(tid, GL_TEXTURE_BORDER_COLOR, border);
+        }
+
+        glNamedFramebufferTexture(m_bufferID, GL_COLOR_ATTACHMENT0 + n_color_buffs + i, tid, 0);
+
 	}
     SetDrawBuffers();
+}
+void OvRendering::Buffers::Framebuffer::AddDepthCubemap() {
+
+
+    m_deptexture= std::make_unique<OvRendering::Resources::Texture2D>(GL_TEXTURE_CUBE_MAP, width, height, 6, GL_DEPTH_COMPONENT24, 1);
+    GLuint tid = m_deptexture->id;
+
+    glTextureParameteri(tid, GL_DEPTH_STENCIL_TEXTURE_MODE, GL_DEPTH_COMPONENT);
+    glTextureParameteri(tid, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTextureParameteri(tid, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTextureParameteri(tid, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(tid, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(tid, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    glNamedFramebufferTexture(m_bufferID, GL_DEPTH_ATTACHMENT, tid, 0);
+    
+    const GLenum null[] = { GL_NONE };
+    glNamedFramebufferReadBuffer(m_bufferID, GL_NONE);
+    glNamedFramebufferDrawBuffers(m_bufferID, 1, null);
+    
+    
+
+
+}
+const OvRendering::Resources::Texture2D&  OvRendering::Buffers::Framebuffer::GetDepthTexture() const{
+    return *m_deptexture;
 }
 void OvRendering::Buffers::Framebuffer::AddDepStRenderBuffer(bool multisample) {
 	if (m_depthStencilBuffer == 0) {
@@ -105,6 +141,27 @@ void OvRendering::Buffers::Framebuffer::AddDepStRenderBuffer(bool multisample) {
 		glNamedFramebufferRenderbuffer(m_bufferID, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_depthStencilBuffer);
 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
 	}
+}
+void OvRendering::Buffers::Framebuffer::Clear(GLint index)const {
+    const GLfloat clear_color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    const GLfloat clear_depth = 1.0f;
+    const GLint clear_stencil = 0;
+
+    // clear one of the color attachments
+    if (index >= 0) {
+        glClearNamedFramebufferfv(m_bufferID, GL_COLOR, index, clear_color);
+    }
+    // clear the depth buffer
+    else if (index == -1) {
+        glClearNamedFramebufferfv(m_bufferID, GL_DEPTH, 0, &clear_depth);
+    }
+    // clear the stencil buffer
+    else if (index == -2) {
+        glClearNamedFramebufferiv(m_bufferID, GL_STENCIL, 0, &clear_stencil);
+    }
+
+
+
 }
 void OvRendering::Buffers::Framebuffer::SetDrawBuffers() const
 {
@@ -138,9 +195,15 @@ uint32_t OvRendering::Buffers::Framebuffer::GetID() const
 uint32_t OvRendering::Buffers::Framebuffer::GetTextureID(uint16_t index)
 {
 	if(index<color_attachments.size())
-	return color_attachments.at(index);
+	return color_attachments.at(index).id;
 	return 0;
 }
+const OvRendering::Resources::Texture2D& OvRendering::Buffers::Framebuffer::GetColorTexture(GLenum index) const
+{
+  
+    return color_attachments[index];
+}
+
 uint32_t OvRendering::Buffers::Framebuffer::GetRenderBufferID()
 {
 	return m_depthStencilBuffer;

@@ -57,7 +57,8 @@ void main() {
 
     const float max_level = textureQueryLevels(skybox) - 1.0;
     vec3 irradiance = textureLod(skybox, _tex_coords, clamp(lod, 0.0, max_level)).rgb;
-    color = vec4(Linear2Gamma(ApproxACES(irradiance * exposure)), 1.0);
+    //color = vec4(Linear2Gamma(ApproxACES(irradiance * exposure)), 1.0);
+    color = vec4(irradiance * exposure, 1.0);
     bloom=vec4(0.0);
 }
 

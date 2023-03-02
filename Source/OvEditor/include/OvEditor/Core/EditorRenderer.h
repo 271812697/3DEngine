@@ -58,6 +58,7 @@ namespace OvEditor::Core
 		* @param p_camera
 		*/
 		void RenderScene(const OvMaths::FVector3& p_cameraPosition, const OvRendering::LowRenderer::Camera& p_camera, const OvRendering::Data::Frustum* p_customFrustum = nullptr);
+        void RenderSceneShadow(const OvMaths::FVector3& p_cameraPosition, const OvRendering::LowRenderer::Camera& p_camera, const OvRendering::Data::Frustum* p_customFrustum = nullptr);
 
 		/**
 		* Render the scene for actor picking (Unlit version of the scene with colors indicating actor IDs)

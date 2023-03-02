@@ -55,6 +55,7 @@ namespace OvRendering::Entities
 		float				cutoff		= 12.f;
 		float				outerCutoff = 15.f;
 		float				type		= 0.0f;
+        float               shadowindex = 0.0f;
 
 	protected:
 		OvMaths::FTransform& m_transform;

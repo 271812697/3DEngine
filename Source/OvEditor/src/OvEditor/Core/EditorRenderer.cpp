@@ -164,6 +164,12 @@ void OvEditor::Core::EditorRenderer::RenderScene(const OvMaths::FVector3& p_came
 	m_context.renderer->RenderScene(*m_context.sceneManager.GetCurrentScene(), p_cameraPosition, p_camera, p_customFrustum, &m_emptyMaterial);
 	m_context.lightSSBO->Unbind();
 }
+void OvEditor::Core::EditorRenderer::RenderSceneShadow(const OvMaths::FVector3& p_cameraPosition, const OvRendering::LowRenderer::Camera& p_camera, const OvRendering::Data::Frustum* p_customFrustum) {
+    
+    m_context.lightSSBO->Bind(0);
+   // m_context.renderer->RenderScene(*m_context.sceneManager.GetCurrentScene(), p_cameraPosition, p_camera, p_customFrustum, &m_emptyMaterial);
+    m_context.lightSSBO->Unbind();
+}
 
 void OvEditor::Core::EditorRenderer::RenderSceneForActorPicking()
 {

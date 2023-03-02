@@ -49,11 +49,12 @@ void main()
 
 uniform vec3 color;
 
-out vec4 FRAGMENT_COLOR;
-
+layout(location = 0) out vec4 FRAGMENT_COLOR;
+layout(location = 1) out vec4 bloom;
 void main()
 {
 	FRAGMENT_COLOR = vec4(color, 1.0);
+    bloom=vec4(0.0,0.0,0.0,1.0);
 }
 )";
 
@@ -140,7 +141,8 @@ float log10(float x) { return log(x) * INV_LN10; }
 float max2(const vec2 v) { return max(v.x, v.y); }
 vec2 step3(const vec2 a, const vec2 x, const vec2 b) { return step(a, x) - step(b, x); }
 in vec2 _uv;
-out vec4 color;
+layout(location = 0) out vec4 color;
+layout(location = 1) out vec4 bloom;
 void main() {
     // higher derivative = farther cell = smaller LOD = less details = more transparent
     vec2 derivative = fwidth(_uv);
@@ -175,6 +177,7 @@ void main() {
     // blend between LOD level alphas and scale with opacity falloff
     c.a *= (alpha_2 > 0.0 ? alpha_2 : alpha_1 > 0.0 ? alpha_1 : (alpha_0 * (1.0 - fade))) * opacity_falloff;
     color = c;
+    bloom = vec4(0.0,0.0,0.0,1.0);
 };
 )";
 
@@ -228,35 +231,7 @@ void OvRendering::Core::ShapeDrawer::DrawGrid(const OvMaths::FVector3& p_viewPos
     m_renderer.SetCapability(OvRendering::Settings::ERenderingCapability::BLEND, false);
     m_gridShader->Unbind();
 	
-    /*
-    m_gridShader->Bind();
-    m_gridShader->SetUniformVec3("color", p_color);
-	m_gridShader->SetUniformVec3("viewPos", p_viewPos);
-	m_gridShader->SetUniformFloat("linear", p_linear);
-	m_gridShader->SetUniformFloat("quadratic", p_quadratic);
-	m_gridShader->SetUniformFloat("fadeThreshold", p_fadeThreshold);
-
-	m_renderer.SetRasterizationMode(OvRendering::Settings::ERasterizationMode::LINE);
-	m_renderer.SetRasterizationLinesWidth(p_lineWidth);
-	m_renderer.SetCapability(OvRendering::Settings::ERenderingCapability::BLEND, true);
-
-	for (int32_t i = -p_gridSize + 1; i < p_gridSize; ++i)
-	{
-		m_gridShader->SetUniformVec3("start", { -(float)p_gridSize + std::floor(p_viewPos.x), 0.f, (float)i + std::floor(p_viewPos.z) });
-		m_gridShader->SetUniformVec3("end", { (float)p_gridSize + std::floor(p_viewPos.x), 0.f, (float)i + std::floor(p_viewPos.z) });
-		m_renderer.Draw(*m_lineMesh, Settings::EPrimitiveMode::LINES);
-
-		m_gridShader->SetUniformVec3("start", { (float)i + std::floor(p_viewPos.x), 0.f, -(float)p_gridSize + std::floor(p_viewPos.z) });
-		m_gridShader->SetUniformVec3("end", { (float)i + std::floor(p_viewPos.x), 0.f, (float)p_gridSize + std::floor(p_viewPos.z) });
-		m_renderer.Draw(*m_lineMesh, Settings::EPrimitiveMode::LINES);
-	}
-
-	m_renderer.SetCapability(OvRendering::Settings::ERenderingCapability::BLEND, false);
-	m_renderer.SetRasterizationLinesWidth(1.0f);
-	m_renderer.SetRasterizationMode(OvRendering::Settings::ERasterizationMode::FILL);
-    
-    	m_gridShader->Unbind();
-    */
+ 
 
 
 }

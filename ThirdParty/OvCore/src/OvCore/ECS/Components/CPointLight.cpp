@@ -75,6 +75,7 @@ void OvCore::ECS::Components::CPointLight::OnSerialize(tinyxml2::XMLDocument & p
 	Serializer::SerializeFloat(p_doc, p_node, "linear", m_data.linear);
 	Serializer::SerializeFloat(p_doc, p_node, "quadratic", m_data.quadratic);
     Serializer::SerializeFloat(p_doc, p_node, "range", m_data.range);
+    Serializer::SerializeFloat(p_doc, p_node, "shadowindex", m_data.shadowindex);
 }
 
 void OvCore::ECS::Components::CPointLight::OnDeserialize(tinyxml2::XMLDocument & p_doc, tinyxml2::XMLNode * p_node)
@@ -87,6 +88,7 @@ void OvCore::ECS::Components::CPointLight::OnDeserialize(tinyxml2::XMLDocument &
 	Serializer::DeserializeFloat(p_doc, p_node, "linear", m_data.linear);
 	Serializer::DeserializeFloat(p_doc, p_node, "quadratic", m_data.quadratic);
     Serializer::DeserializeFloat(p_doc, p_node, "range", m_data.range);
+    Serializer::DeserializeFloat(p_doc, p_node, "shadowindex", m_data.shadowindex);
 }
 
 void OvCore::ECS::Components::CPointLight::OnInspector(OvUI::Internal::WidgetContainer& p_root)
@@ -116,4 +118,5 @@ void OvCore::ECS::Components::CPointLight::OnInspector(OvUI::Internal::WidgetCon
 	GUIDrawer::DrawScalar<float>(p_root, "Linear", m_data.linear, 0.005f, 0.f);
 	GUIDrawer::DrawScalar<float>(p_root, "Quadratic", m_data.quadratic, 0.005f, 0.f);
     GUIDrawer::DrawScalar<float>(p_root, "range", m_data.range, 0.1f, 1.0f);
+    GUIDrawer::DrawScalar<float>(p_root, "shadowindex", m_data.shadowindex, 1.0, 0.0f,6.0f);
 }

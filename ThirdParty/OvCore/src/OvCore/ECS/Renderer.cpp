@@ -111,6 +111,34 @@ void OvCore::ECS::Renderer::RenderScene
 	for (const auto& [distance, drawable] : transparentMeshes)
 		DrawDrawable(drawable);
 }
+void OvCore::ECS::Renderer::RenderSceneShadow
+(
+    OvCore::SceneSystem::Scene& p_scene,
+    const OvMaths::FVector3& p_cameraPosition,
+    const OvRendering::LowRenderer::Camera& p_camera,
+    const OvRendering::Data::Frustum* p_customFrustum,
+    OvCore::Resources::Material* p_defaultMaterial
+)
+{
+    OpaqueDrawables	opaqueMeshes;
+    TransparentDrawables transparentMeshes;
+
+    if (p_camera.HasFrustumGeometryCulling())
+    {
+        const auto& frustum = p_customFrustum ? *p_customFrustum : p_camera.GetFrustum();
+        std::tie(opaqueMeshes, transparentMeshes) = FindAndSortFrustumCulledDrawables(p_scene, p_cameraPosition, frustum, p_defaultMaterial);
+    }
+    else
+    {
+        std::tie(opaqueMeshes, transparentMeshes) = FindAndSortDrawables(p_scene, p_cameraPosition, p_defaultMaterial);
+    }
+
+    for (const auto& [distance, drawable] : opaqueMeshes)
+        DrawDrawable(drawable);
+
+    for (const auto& [distance, drawable] : transparentMeshes)
+        DrawDrawable(drawable);
+}
 
 void FindAndSortDrawables
 (

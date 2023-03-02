@@ -59,6 +59,7 @@ namespace OvEditor::Panels
         std::unique_ptr<OvRendering::Buffers::Framebuffer> m_mulfbo;
         std::unique_ptr<OvRendering::Buffers::Framebuffer> m_resfbo;
         std::unique_ptr<OvRendering::Buffers::Framebuffer> m_bloomfbo;
+        std::array<std::unique_ptr<OvRendering::Buffers::Framebuffer> ,7>m_shadowfbo;
 		OvCore::SceneSystem::SceneManager& m_sceneManager;
 		std::unique_ptr<OvRendering::Buffers::Framebuffer> m_actorPickingFramebuffer;
         unsigned m_currentOperation = 7;

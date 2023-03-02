@@ -37,6 +37,7 @@ OvMaths::FMatrix4 OvRendering::Entities::Light::GenerateMatrix() const
 
 	result.data[8] = static_cast<float>(Pack(color));
     result.data[9] = range; 
+    result.data[10] = shadowindex;
 	result.data[12] = type;
 	result.data[13] = cutoff;
 	result.data[14] = outerCutoff;

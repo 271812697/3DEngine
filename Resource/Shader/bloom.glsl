@@ -13,7 +13,7 @@
 
 #ifdef compute_shader
 
-#define k19x19
+#define k11x11
 #ifndef _GAUSSIAN_H
 #define _GAUSSIAN_H
 

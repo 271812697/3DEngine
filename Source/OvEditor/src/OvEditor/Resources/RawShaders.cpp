@@ -322,7 +322,7 @@ void main()
     float fade_io = 0.3 + abs(cos(ubo_Time));
     float intensity = light_intensity * fade_io;
 
-    bloom = vec4(1.0,1.0,1.0,1.0);;
+    bloom = vec4(intensity*u_Diffuse.rgb,1.0);
    
     FRAGMENT_COLOR = texture(u_DiffuseMap, u_TextureOffset + vec2(mod(fs_in.TexCoords.x * u_TextureTiling.x, 1), mod(fs_in.TexCoords.y * u_TextureTiling.y, 1))) * u_Diffuse;
 

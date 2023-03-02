@@ -78,6 +78,11 @@ namespace OvCore::ECS
 			const OvRendering::Data::Frustum* p_customFrustum = nullptr,
 			OvCore::Resources::Material* p_defaultMaterial = nullptr
 		);
+        void RenderSceneShadow(OvCore::SceneSystem::Scene& p_scene,
+            const OvMaths::FVector3& p_cameraPosition,
+            const OvRendering::LowRenderer::Camera& p_camera,
+            const OvRendering::Data::Frustum* p_customFrustum = nullptr,
+            OvCore::Resources::Material* p_defaultMaterial = nullptr);
 
 		/**
 		* Returns opaque and transparents drawables from the scene with frustum culling
