@@ -1122,7 +1122,7 @@ void main() {
     //vec3 Lo=albedo.rgb;
     vec3 Le = vec3(0.0);  // emission
 
-    //Lo += EvaluateIBL(px) * min(max(ibl_exposure, 0.5),0.7);
+    Lo += EvaluateIBL(px) * min(max(ibl_exposure, 0.5),1.0);
 
     for(int i=0;i<ssbo_Lights.length();i++){
         //DIRECTIONAL
@@ -1147,6 +1147,6 @@ void main() {
 
     }
     bloom = vec4(0.0,0.0,0.0,1.0);
-    color = vec4(Lo + Le, px.albedo.a);
+    color = vec4(Lo + Le, 1.0);
  
 }
