@@ -11,6 +11,7 @@
 #include <OvCore/Resources/Material.h>
 
 #include "OvEditor/Panels/AViewControllable.h"
+#include "Opengl//asset/shader.h"
 
 namespace OvEditor::Panels
 {
@@ -52,6 +53,10 @@ namespace OvEditor::Panels
 		ViewableResource GetResource() const;
 
 	private:
+        std::shared_ptr<asset::Shader>postprocess_shader;
+       
+        unsigned int Quad = 0;
+        std::unique_ptr<OvRendering::Buffers::Framebuffer> m_resfbo;
 		ViewableResource m_resource;
 	};
 }

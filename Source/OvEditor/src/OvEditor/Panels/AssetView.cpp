@@ -11,7 +11,6 @@
 #include "OvEditor/Core/EditorActions.h"
 #include "OvEditor/Panels/AssetView.h"
 
-
 OvEditor::Panels::AssetView::AssetView
 (
 	const std::string& p_title,
@@ -44,6 +43,12 @@ OvEditor::Panels::AssetView::AssetView
 			break;
 		}
 	};
+    m_resfbo = std::make_unique<OvRendering::Buffers::Framebuffer>(1, 1);
+    m_resfbo->AddColorTexture(1);
+    m_resfbo->AddDepStRenderBuffer();
+    glCreateVertexArrays(1, &Quad);
+    postprocess_shader = std::make_shared<asset::Shader>("Resource\\Shader\\post_process.glsl");
+
 }
 
 void OvEditor::Panels::AssetView::_Render_Impl()
@@ -51,8 +56,11 @@ void OvEditor::Panels::AssetView::_Render_Impl()
 	PrepareCamera();
 
 	auto& baseRenderer = *EDITOR_CONTEXT(renderer).get();
+    auto [winWidth, winHeight] = GetSafeSize();
 
-	m_fbo->Bind();
+    m_resfbo->Resize(winWidth, winHeight);
+    m_resfbo->Bind();
+	//m_fbo->Bind();
 
 	baseRenderer.SetStencilMask(0xFF);
 	baseRenderer.Clear(m_camera);
@@ -68,13 +76,34 @@ void OvEditor::Panels::AssetView::_Render_Impl()
 	
 	if (auto pval = std::get_if<OvRendering::Resources::Texture*>(&m_resource); pval && *pval)
 		m_editorRenderer.RenderTextureAsset(**pval);
-	
-	if (auto pval = std::get_if<OvCore::Resources::Material*>(&m_resource); pval && *pval)
+	 
+     if (auto pval = std::get_if<OvCore::Resources::Material*>(&m_resource); pval && *pval) {
+ 
 		m_editorRenderer.RenderMaterialAsset(**pval);
 
-	baseRenderer.ApplyStateMask(glState);
 
-	m_fbo->Unbind();
+    }
+
+
+	
+
+    m_resfbo->Unbind();
+    //postprocess pass
+    {
+        m_fbo->Clear();
+        m_fbo->Bind();
+        m_resfbo->GetColorTexture(0).Bind(0);
+       
+        postprocess_shader->Bind();
+        postprocess_shader->SetUniform(0, 3);  // select tone-mapping operator
+        glBindVertexArray(Quad);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glBindVertexArray(0);
+        postprocess_shader->Unbind();
+        m_fbo->Unbind();
+    }
+    baseRenderer.ApplyStateMask(glState);
+	//m_fbo->Unbind();
 }
 
 void OvEditor::Panels::AssetView::SetResource(ViewableResource p_resource)

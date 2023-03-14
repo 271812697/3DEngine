@@ -283,6 +283,7 @@ void OvEditor::Panels::SceneView::RenderScene(uint8_t p_defaultRenderState)
     postprocess_shader->SetUniform(0, 3);  // select tone-mapping operator
     glBindVertexArray(Quad);
     glDrawArrays(GL_TRIANGLES, 0, 3);
+    glBindVertexArray(0);
     postprocess_shader->Unbind();
     m_fbo->Unbind();
     }
