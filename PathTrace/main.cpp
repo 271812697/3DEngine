@@ -18,13 +18,14 @@
 #include<OvUI/Widgets/Layout/Columns.h>
 #include<OvUI/Widgets/Visual/Separator.h>
 
-#include "src/imguizmo/ImGuizmo.h"
+#include"ImGuizmo.h"
 #include "src/core/Scene.h"
 #include "src/loaders/Loader.h"
 #include "src/loaders/GLTFLoader.h"
 #include "src/core/Renderer.h"
 #include "stb_image/stb_image.h"
 #include "stb_image/stb_image_write.h"
+
 
 using namespace std;
 using namespace GLSLPT;
