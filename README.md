@@ -1,6 +1,6 @@
-# Opengl Engine
+# 3D Graphic
 
-This is an Opengl Engine inspired by [Overload](https://github.com/adriengivry/Overload), it is written to learn the structural concept of a game engine. 
+这是一个我在3D图形学习中实践编写的代码的仓库，里面记录我学习3D图形的各种历程
 
 # How to Build(Windows only)
 
